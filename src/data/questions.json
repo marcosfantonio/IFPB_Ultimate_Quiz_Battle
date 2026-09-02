@@ -1,0 +1,284 @@
+{
+  "questions": [
+    {
+      "question": "ENEM 2019 - Qual o principal bioma brasileiro ameaçado pelo desmatamento na região do arco do desflorestamento?",
+      "options": ["Cerrado", "Amazônia", "Mata Atlântica", "Caatinga", "Pampa"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "Geografia"
+    },
+    {
+      "question": "ENEM 2018 - A Revolução Industrial teve início na Inglaterra no século XVIII. Qual fator foi determinante para isso?",
+      "options": ["Abundância de petróleo", "Acúmulo de capitais e reservas de carvão", "Mão de obra escrava", "Clima favorável", "Isolamento geográfico"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "História"
+    },
+    {
+      "question": "ENEM 2020 - Qual é a função do ribossomo na célula?",
+      "options": ["Produzir energia", "Síntese de proteínas", "Digestão celular", "Armazenar DNA", "Transporte de água"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "Biologia"
+    },
+    {
+      "question": "ENEM 2023 - O ciclo da água envolve evaporação, condensação e precipitação. Qual processo é responsável pela formação das nuvens?",
+      "options": ["Evaporação", "Condensação", "Precipitação", "Infiltração", "Transpiração"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "Geografia"
+    },
+    {
+      "question": "ENEM 2021 - Qual período histórico brasileiro foi marcado pela política do 'café com leite'?",
+      "options": ["Império", "República Velha", "Era Vargas", "Ditadura Militar", "Nova República"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "História"
+    },
+    {
+      "question": "ENEM 2019 - Qual é a unidade básica da vida, menor estrutura capaz de realizar todas as funções vitais?",
+      "options": ["Átomo", "Molécula", "Célula", "Tecido", "Órgão"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "Biologia"
+    },
+    {
+      "question": "ENEM 2022 - Qual foi o primeiro presidente eleito pelo voto direto após a ditadura militar no Brasil?",
+      "options": ["Tancredo Neves", "José Sarney", "Fernando Collor", "Itamar Franco", "FHC"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "História"
+    },
+    {
+      "question": "ENEM 2020 - O Brasil é dividido em quantos fusos horários?",
+      "options": ["2", "3", "4", "5", "6"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "Geografia"
+    },
+    {
+      "question": "ENEM 2018 - O Tratado de Tordesilhas, assinado em 1494, dividia as terras descobertas entre:",
+      "options": ["Espanha e Inglaterra", "Portugal e França", "Portugal e Espanha", "Espanha e Holanda", "Portugal e Holanda"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "História"
+    },
+    {
+      "question": "ENEM 2019 - O DNA é composto por nucleotídeos que contêm:",
+      "options": ["Apenas base nitrogenada", "Base nitrogenada e açúcar", "Base nitrogenada, açúcar e fosfato", "Apenas fosfato", "Aminoácidos"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "Biologia"
+    },
+    {
+      "question": "ENEM 2021 - Se log₁₀(2) = 0,301 e log₁₀(3) = 0,477, qual o valor de log₁₀(12)?",
+      "options": ["0,778", "1,079", "1,255", "0,954", "1,380"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Matemática"
+    },
+    {
+      "question": "ENEM 2019 - O efeito estufa é um fenômeno natural essencial para a vida na Terra. O problema atual decorre de:",
+      "options": ["Diminuição da camada de ozônio", "Intensificação pela emissão excessiva de gases", "Redução da radiação solar", "Aumento da atividade vulcânica", "Expansão dos oceanos"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Química"
+    },
+    {
+      "question": "ENEM 2017 - A obra 'Memórias Póstumas de Brás Cubas', de Machado de Assis, é considerada marco do Realismo brasileiro porque:",
+      "options": ["Retrata heróis românticos", "Usa narrativa linear e simples", "Ironiza a sociedade e analisa psicologicamente os personagens", "Celebra o indianismo", "É escrita em versos"],
+      "correct": 2,
+      "difficulty": "medium",
+      "category": "Português"
+    },
+    {
+      "question": "ENEM 2019 - A segunda lei de Newton (F = m·a) indica que, para uma mesma força aplicada, um corpo com maior massa terá:",
+      "options": ["Maior aceleração", "Menor aceleração", "Mesma aceleração", "Velocidade constante", "Aceleração infinita"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2022 - Em uma PA de razão 3, sabendo que o 5° termo é 17, qual é o 1° termo?",
+      "options": ["2", "5", "8", "3", "11"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Matemática"
+    },
+    {
+      "question": "ENEM 2021 - O fenômeno da refração da luz ocorre quando:",
+      "options": ["A luz é absorvida por um material", "A luz muda de meio e altera sua velocidade", "A luz é refletida por um espelho", "A luz se dispersa em cores", "A luz é polarizada"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2018 - O Modernismo brasileiro teve como marco inicial a:",
+      "options": ["Independência do Brasil", "Semana de Arte Moderna de 1922", "Proclamação da República", "Revolução de 1930", "Constituição de 1988"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Português"
+    },
+    {
+      "question": "ENEM 2020 - Qual gás é o principal responsável pela destruição da camada de ozônio?",
+      "options": ["CO₂", "CFC", "CH₄", "N₂O", "SO₂"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Química"
+    },
+    {
+      "question": "ENEM 2019 - A mitose é um tipo de divisão celular que resulta em:",
+      "options": ["4 células haploides", "2 células diploides idênticas", "4 células diploides", "2 células haploides", "1 célula tetraploide"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Biologia"
+    },
+    {
+      "question": "ENEM 2023 - Qual processo biológico é responsável pela produção de ATP nas mitocôndrias?",
+      "options": ["Glicólise", "Fotossíntese", "Fosforilação oxidativa", "Fermentação", "Quimiossíntese"],
+      "correct": 2,
+      "difficulty": "medium",
+      "category": "Biologia"
+    },
+    {
+      "question": "ENEM 2022 - Um dado honesto é lançado duas vezes. Qual a probabilidade de a soma dos resultados ser igual a 7?",
+      "options": ["1/12", "1/6", "5/36", "1/4", "7/36"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Matemática"
+    },
+    {
+      "question": "ENEM 2020 - Na eletrólise ígnea do NaCl, quais são os produtos formados no cátodo e no ânodo, respectivamente?",
+      "options": ["H₂ e O₂", "Na e Cl₂", "NaOH e HCl", "Cl₂ e Na", "O₂ e H₂"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Química"
+    },
+    {
+      "question": "ENEM 2018 - Segundo a Teoria da Relatividade Restrita de Einstein, o que acontece com a massa de um objeto à medida que sua velocidade se aproxima da velocidade da luz?",
+      "options": ["Diminui até zero", "Permanece constante", "Aumenta tendendo ao infinito", "Oscila periodicamente", "Torna-se negativa"],
+      "correct": 2,
+      "difficulty": "hard",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2020 - Qual é o número de oxidação (Nox) do manganês no permanganato de potássio (KMnO₄)?",
+      "options": ["+4", "+5", "+6", "+7", "+3"],
+      "correct": 3,
+      "difficulty": "hard",
+      "category": "Química"
+    },
+    {
+      "question": "ENEM 2017 - O princípio da incerteza de Heisenberg afirma que é impossível conhecer simultaneamente com precisão:",
+      "options": ["Massa e carga de uma partícula", "Posição e momento de uma partícula", "Energia e temperatura", "Velocidade da luz e tempo", "Frequência e amplitude"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2021 - A integral definida ∫₀² (3x² + 2x) dx é igual a:",
+      "options": ["8", "10", "12", "14", "16"],
+      "correct": 2,
+      "difficulty": "hard",
+      "category": "Matemática"
+    },
+    {
+      "question": "ENEM 2019 - Na reação de neutralização entre H₂SO₄ e NaOH, qual a proporção molar correta entre ácido e base?",
+      "options": ["1:1", "1:2", "2:1", "1:3", "2:3"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Química"
+    },
+    {
+      "question": "ENEM 2022 - O conceito de entropia na termodinâmica está diretamente relacionado a:",
+      "options": ["Conservação de energia", "Grau de desordem do sistema", "Temperatura absoluta", "Pressão atmosférica", "Volume molar"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2020 - A equação de Schrödinger é fundamental para descrever:",
+      "options": ["Movimento planetário", "Comportamento de partículas quânticas", "Ondas sonoras", "Eletromagnetismo clássico", "Relatividade geral"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2021 - Qual é a fórmula da velocidade de escape de um corpo celeste de massa M e raio R?",
+      "options": ["√(GM/R)", "√(2GM/R)", "√(GM/2R)", "2GM/R", "GM/R²"],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2021 - Qual é a capital da Austrália?",
+      "options": ["Sydney", "Melbourne", "Canberra", "Brisbane", "Perth"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "Geografia"
+    },
+    {
+      "question": "ENEM 2020 - O autor de 'Dom Casmurro' é:",
+      "options": ["José de Alencar", "Machado de Assis", "Graciliano Ramos", "Jorge Amado", "Érico Veríssimo"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "Português"
+    },
+    {
+      "question": "ENEM 2019 - A fórmula da área de um círculo de raio r é:",
+      "options": ["2πr", "πr²", "πd", "2πr²", "πr/2"],
+      "correct": 1,
+      "difficulty": "easy",
+      "category": "Matemática"
+    },
+    {
+      "question": "ENEM 2022 - Qual lei de Newton diz que 'para toda ação existe uma reação igual e oposta'?",
+      "options": ["1ª Lei", "2ª Lei", "3ª Lei", "Lei da Gravitação", "Lei da Inércia"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2018 - O pH de uma solução neutra a 25°C é:",
+      "options": ["0", "5", "7", "10", "14"],
+      "correct": 2,
+      "difficulty": "easy",
+      "category": "Química"
+    },
+    {
+      "question": "ENEM 2023 - Em uma PG com primeiro termo 2 e razão 3, qual o 4° termo?",
+      "options": ["18", "24", "54", "162", "8"],
+      "correct": 2,
+      "difficulty": "medium",
+      "category": "Matemática"
+    },
+    {
+      "question": "ENEM 2020 - A Inconfidência Mineira (1789) tinha como objetivo principal:",
+      "options": ["Abolir a escravidão", "Independência do Brasil de Portugal", "Criar uma monarquia brasileira", "Expandir o território", "Proteger os indígenas"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "História"
+    },
+    {
+      "question": "ENEM 2019 - A velocidade da luz no vácuo é aproximadamente:",
+      "options": ["3 × 10⁶ m/s", "3 × 10⁷ m/s", "3 × 10⁸ m/s", "3 × 10⁹ m/s", "3 × 10¹⁰ m/s"],
+      "correct": 2,
+      "difficulty": "medium",
+      "category": "Física"
+    },
+    {
+      "question": "ENEM 2021 - O gênero literário de 'Iracema', de José de Alencar, é:",
+      "options": ["Realismo", "Romantismo", "Naturalismo", "Modernismo", "Parnasianismo"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Português"
+    },
+    {
+      "question": "ENEM 2022 - A constante de Avogadro é aproximadamente igual a:",
+      "options": ["6,02 × 10²³", "3,14 × 10⁸", "1,38 × 10⁻²³", "9,8 × 10¹", "6,67 × 10⁻¹¹"],
+      "correct": 0,
+      "difficulty": "medium",
+      "category": "Química"
+    }
+  ]
+}
