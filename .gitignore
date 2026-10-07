@@ -15,3 +15,11 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+.opencode/
+!.opencode/settings.json
+
+# Caches e arquivos temporários de execução
+.opencode/cache/
+.opencode/logs/
+*.opencode-workspace

@@ -1,6 +1,6 @@
 extends Node2D
 
-enum GameState { WAITING, QUESTION, PROJECTILE, GAME_OVER }
+enum GameState { START_SCREEN, WAITING, QUESTION, PROJECTILE, GAME_OVER }
 
 const HP_MAX = 10.0
 const DAMAGE = 1.0
@@ -50,7 +50,19 @@ var p1_name_bg: ColorRect
 var p2_name_bg: ColorRect
 var p1_hp_label_bg: ColorRect
 var p2_hp_label_bg: ColorRect
+var p1_area: VBoxContainer
+var p2_area: VBoxContainer
+var q_area: VBoxContainer
+var hint_container: MarginContainer
+var p1_black_bg: ColorRect
+var p2_black_bg: ColorRect
 var hint: Label
+var start_screen_node: Control
+var start_prompt_label: Label
+var blink_timer: float = 0.0
+var custom_font = load("res://assets/upheavtt.ttf")
+var bgm_player: AudioStreamPlayer
+var sfx_player: AudioStreamPlayer
 var idle_timer: float = 0.0
 var showing_aluno2: bool = false
 var showing_idle_animation: bool = false
@@ -66,12 +78,27 @@ const P2_TEXTS = ["Q", "W", "E", "R", "T"]
 
 func _ready() -> void:
 	z_index = 10
+	state = GameState.START_SCREEN
 	_load_questions()
+	_setup_audio()
 	_build_ui()
-	_start_question()
+	_build_start_screen()
+	_apply_font_to_control(self)
+	
+	# Hide gameplay UI elements until Enter is pressed
+	if p1_area: p1_area.visible = false
+	if p2_area: p2_area.visible = false
+	if q_area: q_area.visible = false
+	if hint_container: hint_container.visible = false
+	if p1_black_bg: p1_black_bg.visible = false
+	if p2_black_bg: p2_black_bg.visible = false
 
 
 func _process(delta: float) -> void:
+	if state == GameState.START_SCREEN and start_prompt_label:
+		blink_timer += delta * 4.0
+		start_prompt_label.modulate.a = (sin(blink_timer) + 1.0) * 0.5 * 0.5 + 0.5
+
 	if projectile_active:
 		_update_projectile(delta)
 	
@@ -95,6 +122,24 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		if state == GameState.START_SCREEN:
+			if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+				_play_sfx("res://assets/sounds/select.wav")
+				if start_screen_node:
+					start_screen_node.queue_free()
+				state = GameState.WAITING
+				
+				# Show gameplay UI elements
+				if p1_area: p1_area.visible = true
+				if p2_area: p2_area.visible = true
+				if q_area: q_area.visible = true
+				if hint_container: hint_container.visible = true
+				if p1_black_bg: p1_black_bg.visible = true
+				if p2_black_bg: p2_black_bg.visible = true
+
+				_start_question()
+			return
+
 		if locked or state != GameState.QUESTION:
 			return
 		# Player 1
@@ -148,6 +193,7 @@ func _get_next_question() -> Dictionary:
 
 
 func _start_question() -> void:
+	_play_sfx("res://assets/sounds/novaquestao.wav")
 	current_question = _get_next_question()
 	failed_players.clear()
 	question_label.text = current_question["question"]
@@ -205,6 +251,8 @@ func _start_question() -> void:
 		else:
 			option_labels[i].visible = false
 
+	_apply_font_to_control(self)
+
 	state = GameState.QUESTION
 	locked = false
 
@@ -225,8 +273,12 @@ func _handle_answer(player: int, option_index: int) -> void:
 			option_labels[i].modulate = Color(1, 0.2, 0.2, 1)
 
 	if is_correct:
+		_play_sfx("res://assets/sounds/acerto.wav")
+		_show_floating_text(player, "ACERTOU!", Color(0.2, 1, 0.3))
 		_launch_projectile(player)
 	else:
+		_play_sfx("res://assets/sounds/erro.wav")
+		_show_floating_text(player, "ERROU!", Color(1, 0.2, 0.2))
 		failed_players.append(player)
 		await get_tree().create_timer(0.8).timeout
 		if state == GameState.QUESTION:
@@ -289,12 +341,13 @@ func _update_projectile(delta: float) -> void:
 		_on_projectile_hit()
 
 func _on_projectile_hit() -> void:
+	_play_sfx("res://assets/sounds/HIT.wav")
 	if projectile_attacker == 1:
 		p2_hp = max(0.0, p2_hp - DAMAGE)
-		_flash_rect(p2_rect)
+		_flash_sprite(p2_sprite)
 	else:
 		p1_hp = max(0.0, p1_hp - DAMAGE)
-		_flash_rect(p1_rect)
+		_flash_sprite(p1_sprite)
 
 	_update_hp_ui()
 
@@ -307,11 +360,12 @@ func _on_projectile_hit() -> void:
 	_start_question()
 
 
-func _flash_rect(rect: ColorRect) -> void:
-	var original = rect.color
-	rect.color = Color(1, 1, 1)
-	var tween = create_tween()
-	tween.tween_property(rect, "color", original, 0.4)
+func _flash_sprite(sprite: TextureRect) -> void:
+	if sprite:
+		var original = sprite.modulate
+		sprite.modulate = Color(3, 3, 3) # Brilho intenso de flash branco na silhueta
+		var tween = create_tween()
+		tween.tween_property(sprite, "modulate", original, 0.4)
 
 
 func _show_game_over() -> void:
@@ -346,12 +400,12 @@ func _draw() -> void:
 
 func _build_ui() -> void:
 	# --- Player 1 (left, red) ---
-	var p1_black_bg = ColorRect.new()
+	p1_black_bg = ColorRect.new()
 	p1_black_bg.position = Vector2(30, 170)
-	p1_black_bg.custom_minimum_size = Vector2(240, 420)
+	p1_black_bg.custom_minimum_size = Vector2(240, 390)
 	p1_black_bg.color = Color(0, 0, 0, 0.3)
 
-	var p1_area = VBoxContainer.new()
+	p1_area = VBoxContainer.new()
 	p1_area.position = Vector2(30, 200)
 	p1_area.add_theme_constant_override("separation", 8)
 
@@ -370,22 +424,6 @@ func _build_ui() -> void:
 	p1_name_container.add_child(p1_name_bg)
 	p1_name_container.add_child(p1_name)
 	p1_area.add_child(p1_name_container)
-
-	p1_hp_label = Label.new()
-	p1_hp_label.text = "HP: 10.0"
-	p1_hp_label.add_theme_font_size_override("font_size", 18)
-	p1_hp_label.add_theme_color_override("font_color", Color(0.3, 1, 0.3))
-	p1_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	p1_hp_label_bg = ColorRect.new()
-	p1_hp_label_bg.custom_minimum_size = Vector2(180, 30)
-	p1_hp_label_bg.color = Color(0, 0, 0, 0.8)
-
-	var p1_hp_container = MarginContainer.new()
-	p1_hp_container.custom_minimum_size = Vector2(180, 30)
-	p1_hp_container.add_child(p1_hp_label_bg)
-	p1_hp_container.add_child(p1_hp_label)
-	p1_area.add_child(p1_hp_container)
 
 	p1_hp_bar = ProgressBar.new()
 	p1_hp_bar.custom_minimum_size = Vector2(240, 16)
@@ -425,12 +463,12 @@ func _build_ui() -> void:
 	add_child(p1_area)
 
 	# --- Player 2 (right, blue) ---
-	var p2_black_bg = ColorRect.new()
+	p2_black_bg = ColorRect.new()
 	p2_black_bg.position = Vector2(880, 170)
-	p2_black_bg.custom_minimum_size = Vector2(240, 420)
+	p2_black_bg.custom_minimum_size = Vector2(240, 390)
 	p2_black_bg.color = Color(0, 0, 0, 0.3)
 
-	var p2_area = VBoxContainer.new()
+	p2_area = VBoxContainer.new()
 	p2_area.position = Vector2(880, 200)
 	p2_area.add_theme_constant_override("separation", 8)
 
@@ -449,22 +487,6 @@ func _build_ui() -> void:
 	p2_name_container.add_child(p2_name_bg)
 	p2_name_container.add_child(p2_name)
 	p2_area.add_child(p2_name_container)
-
-	p2_hp_label = Label.new()
-	p2_hp_label.text = "HP: 10.0"
-	p2_hp_label.add_theme_font_size_override("font_size", 18)
-	p2_hp_label.add_theme_color_override("font_color", Color(0.3, 1, 0.3))
-	p2_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	p2_hp_label_bg = ColorRect.new()
-	p2_hp_label_bg.custom_minimum_size = Vector2(180, 30)
-	p2_hp_label_bg.color = Color(0, 0, 0, 0.8)
-
-	var p2_hp_container = MarginContainer.new()
-	p2_hp_container.custom_minimum_size = Vector2(180, 30)
-	p2_hp_container.add_child(p2_hp_label_bg)
-	p2_hp_container.add_child(p2_hp_label)
-	p2_area.add_child(p2_hp_container)
 
 	p2_hp_bar = ProgressBar.new()
 	p2_hp_bar.custom_minimum_size = Vector2(240, 16)
@@ -500,7 +522,7 @@ func _build_ui() -> void:
 	add_child(p2_area)
 
 	# --- Question area (top center) ---
-	var q_area = VBoxContainer.new()
+	q_area = VBoxContainer.new()
 	q_area.position = Vector2(276, 30)
 	q_area.size = Vector2(600, 300)
 	q_area.add_theme_constant_override("separation", 12)
@@ -594,7 +616,7 @@ func _build_ui() -> void:
 	hint_bg.custom_minimum_size = Vector2(1152, 30)
 	hint_bg.color = Color(0, 0, 0, 0.8)
 
-	var hint_container = MarginContainer.new()
+	hint_container = MarginContainer.new()
 	hint_container.position = Vector2(0, 610)
 	hint_container.size = Vector2(1152, 30)
 	hint_container.custom_minimum_size = Vector2(1152, 30)
@@ -629,16 +651,45 @@ func _build_ui() -> void:
 	add_child(gameover_panel)
 
 
+func _build_start_screen() -> void:
+	start_screen_node = Control.new()
+	start_screen_node.set_anchors_preset(Control.PRESET_FULL_RECT)
+	start_screen_node.z_index = 500
+
+	var overlay = ColorRect.new()
+	overlay.custom_minimum_size = Vector2(1152, 648)
+	overlay.size = Vector2(1152, 648)
+	overlay.color = Color(0, 0, 0, 0.6)
+	start_screen_node.add_child(overlay)
+
+	var logo_rect = TextureRect.new()
+	logo_rect.position = Vector2((1152 - 900) / 2.0, 120)
+	logo_rect.custom_minimum_size = Vector2(900, 300)
+	logo_rect.size = Vector2(900, 300)
+	logo_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var logo_texture = load("res://assets/logo.png")
+	if logo_texture:
+		logo_rect.texture = logo_texture
+	start_screen_node.add_child(logo_rect)
+
+	start_prompt_label = Label.new()
+	start_prompt_label.text = "Pressione Enter para Iniciar"
+	start_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	start_prompt_label.custom_minimum_size = Vector2(1152, 40)
+	start_prompt_label.position = Vector2(0, 460)
+	start_prompt_label.add_theme_font_size_override("font_size", 28)
+	start_prompt_label.add_theme_color_override("font_color", Color(1, 0.84, 0.0)) # Gold color
+	start_screen_node.add_child(start_prompt_label)
+
+	add_child(start_screen_node)
+	_apply_font_to_control(start_screen_node)
+
+
 func _update_hp_ui() -> void:
-	p1_hp_label.text = "HP: %.1f" % p1_hp
-	p2_hp_label.text = "HP: %.1f" % p2_hp
 	p1_hp_bar.value = p1_hp
 	p2_hp_bar.value = p2_hp
-
-	if p1_hp <= 3.0:
-		p1_hp_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
-	if p2_hp <= 3.0:
-		p2_hp_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 
 
 func _update_student_textures() -> void:
@@ -651,6 +702,63 @@ func _update_student_textures() -> void:
 			p1_sprite.texture = tex
 		if p2_sprite:
 			p2_sprite.texture = tex
+
+
+func _show_floating_text(player: int, text: String, color: Color) -> void:
+	var float_label = Label.new()
+	float_label.text = text
+	float_label.add_theme_font_size_override("font_size", 24)
+	float_label.add_theme_color_override("font_color", color)
+	float_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	float_label.z_index = 200
+
+	var rect = p1_rect if player == 1 else p2_rect
+	var global_rect = rect.get_global_rect()
+	float_label.position = Vector2(global_rect.position.x + (global_rect.size.x - 150) * 0.5, global_rect.position.y - 20)
+	float_label.custom_minimum_size = Vector2(150, 40)
+
+	if custom_font:
+		float_label.add_theme_font_override("font", custom_font)
+
+	add_child(float_label)
+
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(float_label, "position:y", float_label.position.y - 50, 0.8)
+	tween.tween_property(float_label, "modulate:a", 0.0, 0.8)
+	
+	await tween.finished
+	float_label.queue_free()
+
+
+func _apply_font_to_control(node: Node) -> void:
+	if node is Label or node is Button:
+		if custom_font:
+			node.add_theme_font_override("font", custom_font)
+	for child in node.get_children():
+		_apply_font_to_control(child)
+
+
+func _setup_audio() -> void:
+	bgm_player = AudioStreamPlayer.new()
+	var bgm_stream = load("res://assets/sounds/main_theme.mp3")
+	if bgm_stream:
+		bgm_player.stream = bgm_stream
+	add_child(bgm_player)
+	bgm_player.play()
+
+	sfx_player = AudioStreamPlayer.new()
+	add_child(sfx_player)
+
+
+func _play_sfx(path: String) -> void:
+	var stream = load(path)
+	if stream:
+		var temp_player = AudioStreamPlayer.new()
+		temp_player.stream = stream
+		add_child(temp_player)
+		temp_player.play()
+		await temp_player.finished
+		temp_player.queue_free()
 
 
 func _on_restart() -> void:
