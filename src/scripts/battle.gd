@@ -707,28 +707,36 @@ func _update_student_textures() -> void:
 func _show_floating_text(player: int, text: String, color: Color) -> void:
 	var float_label = Label.new()
 	float_label.text = text
-	float_label.add_theme_font_size_override("font_size", 24)
+	float_label.add_theme_font_size_override("font_size", 28)
 	float_label.add_theme_color_override("font_color", color)
 	float_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	float_label.z_index = 200
+	float_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	float_label.z_index = 300
 
-	var rect = p1_rect if player == 1 else p2_rect
-	var global_rect = rect.get_global_rect()
-	float_label.position = Vector2(global_rect.position.x + (global_rect.size.x - 150) * 0.5, global_rect.position.y - 20)
-	float_label.custom_minimum_size = Vector2(150, 40)
+	var area = p1_area if player == 1 else p2_area
+	var global_rect = area.get_global_rect()
+	var name_x = global_rect.position.x + (global_rect.size.x - 240) * 0.5
+	var base_y = global_rect.position.y - 75 # Posição inicial base
+	
+	float_label.position = Vector2(name_x, base_y)
+	float_label.custom_minimum_size = Vector2(240, 40)
 
 	if custom_font:
 		float_label.add_theme_font_override("font", custom_font)
 
 	add_child(float_label)
 
-	var tween = create_tween().set_parallel(true)
-	tween.tween_property(float_label, "position:y", float_label.position.y - 50, 0.8)
-	tween.tween_property(float_label, "modulate:a", 0.0, 0.8)
-	
-	await tween.finished
-	float_label.queue_free()
+	var t1 = create_tween()
+	t1.tween_property(float_label, "modulate:a", 1.0, 0.3)# Fade-in rapido (0->100% em 0.3s)
+	await t1.finished
 
+	# Sobe + fade-out PARALELOS: sobe enquanto some rapidamente do 1.0 pra 0.2
+	var t2 = create_tween()
+	t2.tween_property(float_label, "position:y", base_y + 90, 0.8) # Sobe em 0.8s
+	t2.tween_property(float_label, "modulate:a", 0.2, 0.8) # some paralelamente em 0.8s
+	
+	await t2.finished
+	float_label.queue_free()
 
 func _apply_font_to_control(node: Node) -> void:
 	if node is Label or node is Button:
