@@ -14,6 +14,7 @@ var current_question: Dictionary = {}
 var questions_pool: Array = []
 var used_indices: Array = []
 var locked: bool = false
+var failed_players: Array = []
 
 # --- Projectile ---
 var projectile_active: bool = false
@@ -43,6 +44,19 @@ var gameover_label: Label
 var gameover_panel: PanelContainer
 var projectile_node: Node2D
 
+var p1_sprite: TextureRect
+var p2_sprite: TextureRect
+var p1_name_bg: ColorRect
+var p2_name_bg: ColorRect
+var p1_hp_label_bg: ColorRect
+var p2_hp_label_bg: ColorRect
+var hint: Label
+var idle_timer: float = 0.0
+var showing_aluno2: bool = false
+var showing_idle_animation: bool = false
+var idle_duration: float = 1.5
+var idle_duration_target: float = 4.0
+
 # Key mappings
 const P1_KEYS = [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]
 const P2_KEYS = [KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T]
@@ -51,6 +65,7 @@ const P2_TEXTS = ["Q", "W", "E", "R", "T"]
 
 
 func _ready() -> void:
+	z_index = 10
 	_load_questions()
 	_build_ui()
 	_start_question()
@@ -59,6 +74,22 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if projectile_active:
 		_update_projectile(delta)
+	
+	# Idle animation timer for students (synchronized for both)
+	idle_timer += delta
+	if not showing_idle_animation:
+		if idle_timer >= idle_duration_target:
+			showing_idle_animation = true
+			idle_timer = 0.0
+			idle_duration = randf_range(1.5, 3.5)
+			_update_student_textures()
+	else:
+		if idle_timer >= idle_duration:
+			showing_idle_animation = false
+			idle_timer = 0.0
+			idle_duration_target = randf_range(3.0, 7.0)
+			_update_student_textures()
+
 	queue_redraw()
 
 
@@ -67,15 +98,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		if locked or state != GameState.QUESTION:
 			return
 		# Player 1
-		for i in range(mini(P1_KEYS.size(), current_question.get("options", []).size())):
-			if event.keycode == P1_KEYS[i]:
-				_handle_answer(1, i)
-				return
+		if not failed_players.has(1):
+			for i in range(mini(P1_KEYS.size(), current_question.get("options", []).size())):
+				if event.keycode == P1_KEYS[i]:
+					_handle_answer(1, i)
+					return
 		# Player 2
-		for i in range(mini(P2_KEYS.size(), current_question.get("options", []).size())):
-			if event.keycode == P2_KEYS[i]:
-				_handle_answer(2, i)
-				return
+		if not failed_players.has(2):
+			for i in range(mini(P2_KEYS.size(), current_question.get("options", []).size())):
+				if event.keycode == P2_KEYS[i]:
+					_handle_answer(2, i)
+					return
 
 
 # ==================== QUESTIONS ====================
@@ -116,6 +149,7 @@ func _get_next_question() -> Dictionary:
 
 func _start_question() -> void:
 	current_question = _get_next_question()
+	failed_players.clear()
 	question_label.text = current_question["question"]
 
 	# Show difficulty tag
@@ -176,7 +210,7 @@ func _start_question() -> void:
 
 
 func _handle_answer(player: int, option_index: int) -> void:
-	if locked:
+	if locked or failed_players.has(player):
 		return
 	locked = true
 
@@ -193,10 +227,19 @@ func _handle_answer(player: int, option_index: int) -> void:
 	if is_correct:
 		_launch_projectile(player)
 	else:
-		# Wrong answer — unlock for the other player
-		await get_tree().create_timer(0.8).get_completed()
+		failed_players.append(player)
+		await get_tree().create_timer(0.8).timeout
 		if state == GameState.QUESTION:
-			locked = false
+			if failed_players.size() >= 2:
+				# Both players failed, move to next question automatically
+				_start_question()
+			else:
+				# Unlock only for the remaining player
+				locked = false
+				# Reset option colors so the remaining player can try again clearly
+				for i in range(option_labels.size()):
+					if i < current_question["options"].size():
+						option_labels[i].modulate = Color(1, 1, 1, 1)
 
 
 func _launch_projectile(attacker: int) -> void:
@@ -245,7 +288,6 @@ func _update_projectile(delta: float) -> void:
 		projectile_pos = projectile_target
 		_on_projectile_hit()
 
-
 func _on_projectile_hit() -> void:
 	if projectile_attacker == 1:
 		p2_hp = max(0.0, p2_hp - DAMAGE)
@@ -261,7 +303,7 @@ func _on_projectile_hit() -> void:
 		_show_game_over()
 		return
 
-	await get_tree().create_timer(0.5).get_completed()
+	await get_tree().create_timer(0.5).timeout
 	_start_question()
 
 
@@ -303,16 +345,14 @@ func _draw() -> void:
 # ==================== UI BUILD ====================
 
 func _build_ui() -> void:
-	var bg = ColorRect.new()
-	bg.color = Color(0.08, 0.08, 0.12)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
-
-	var win_size = Vector2(1152, 648)
-
 	# --- Player 1 (left, red) ---
+	var p1_black_bg = ColorRect.new()
+	p1_black_bg.position = Vector2(30, 170)
+	p1_black_bg.custom_minimum_size = Vector2(240, 420)
+	p1_black_bg.color = Color(0, 0, 0, 0.3)
+
 	var p1_area = VBoxContainer.new()
-	p1_area.position = Vector2(40, 220)
+	p1_area.position = Vector2(30, 200)
 	p1_area.add_theme_constant_override("separation", 8)
 
 	p1_name = Label.new()
@@ -320,32 +360,78 @@ func _build_ui() -> void:
 	p1_name.add_theme_font_size_override("font_size", 20)
 	p1_name.add_theme_color_override("font_color", Color(1, 0.35, 0.35))
 	p1_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p1_area.add_child(p1_name)
+
+	p1_name_bg = ColorRect.new()
+	p1_name_bg.custom_minimum_size = Vector2(180, 40)
+	p1_name_bg.color = Color(0, 0, 0, 0.8)
+
+	var p1_name_container = MarginContainer.new()
+	p1_name_container.custom_minimum_size = Vector2(180, 40)
+	p1_name_container.add_child(p1_name_bg)
+	p1_name_container.add_child(p1_name)
+	p1_area.add_child(p1_name_container)
 
 	p1_hp_label = Label.new()
 	p1_hp_label.text = "HP: 10.0"
 	p1_hp_label.add_theme_font_size_override("font_size", 18)
 	p1_hp_label.add_theme_color_override("font_color", Color(0.3, 1, 0.3))
 	p1_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p1_area.add_child(p1_hp_label)
+
+	p1_hp_label_bg = ColorRect.new()
+	p1_hp_label_bg.custom_minimum_size = Vector2(180, 30)
+	p1_hp_label_bg.color = Color(0, 0, 0, 0.8)
+
+	var p1_hp_container = MarginContainer.new()
+	p1_hp_container.custom_minimum_size = Vector2(180, 30)
+	p1_hp_container.add_child(p1_hp_label_bg)
+	p1_hp_container.add_child(p1_hp_label)
+	p1_area.add_child(p1_hp_container)
 
 	p1_hp_bar = ProgressBar.new()
-	p1_hp_bar.custom_minimum_size = Vector2(120, 16)
+	p1_hp_bar.custom_minimum_size = Vector2(240, 16)
 	p1_hp_bar.max_value = HP_MAX
 	p1_hp_bar.value = HP_MAX
 	p1_hp_bar.show_percentage = false
+	
+	var p1_bar_bg = ColorRect.new()
+	p1_bar_bg.custom_minimum_size = Vector2(240, 16)
+	p1_bar_bg.color = Color(0, 0, 0, 0.8)
+	
+	var p1_bar_fill_style = StyleBoxFlat.new()
+	p1_bar_fill_style.bg_color = Color(0.1, 0.8, 0.1)
+	p1_hp_bar.add_theme_stylebox_override("fill", p1_bar_fill_style)
+	
+	var p1_bar_bg_style = StyleBoxFlat.new()
+	p1_bar_bg_style.bg_color = Color(0, 0, 0, 0.8)
+	p1_hp_bar.add_theme_stylebox_override("background", p1_bar_bg_style)
+	
 	p1_area.add_child(p1_hp_bar)
 
 	p1_rect = ColorRect.new()
-	p1_rect.custom_minimum_size = Vector2(120, 180)
-	p1_rect.color = Color(0.85, 0.15, 0.15)
+	p1_rect.custom_minimum_size = Vector2(240, 360)
+	p1_rect.color = Color(0, 0, 0, 0.0) # Transparent background container
+	
+	p1_sprite = TextureRect.new()
+	p1_sprite.custom_minimum_size = Vector2(240, 360)
+	p1_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	p1_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	p1_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	p1_sprite.texture = load("res://assets/aluno1.png")
+	p1_sprite.flip_h = true # Invertido para a esquerda
+	p1_rect.add_child(p1_sprite)
+	
 	p1_area.add_child(p1_rect)
 
 	add_child(p1_area)
 
 	# --- Player 2 (right, blue) ---
+	var p2_black_bg = ColorRect.new()
+	p2_black_bg.position = Vector2(880, 170)
+	p2_black_bg.custom_minimum_size = Vector2(240, 420)
+	p2_black_bg.color = Color(0, 0, 0, 0.3)
+
 	var p2_area = VBoxContainer.new()
-	p2_area.position = Vector2(980, 220)
+	p2_area.position = Vector2(880, 200)
 	p2_area.add_theme_constant_override("separation", 8)
 
 	p2_name = Label.new()
@@ -353,25 +439,62 @@ func _build_ui() -> void:
 	p2_name.add_theme_font_size_override("font_size", 20)
 	p2_name.add_theme_color_override("font_color", Color(0.35, 0.55, 1))
 	p2_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p2_area.add_child(p2_name)
+
+	p2_name_bg = ColorRect.new()
+	p2_name_bg.custom_minimum_size = Vector2(180, 40)
+	p2_name_bg.color = Color(0, 0, 0, 0.8)
+
+	var p2_name_container = MarginContainer.new()
+	p2_name_container.custom_minimum_size = Vector2(180, 40)
+	p2_name_container.add_child(p2_name_bg)
+	p2_name_container.add_child(p2_name)
+	p2_area.add_child(p2_name_container)
 
 	p2_hp_label = Label.new()
 	p2_hp_label.text = "HP: 10.0"
 	p2_hp_label.add_theme_font_size_override("font_size", 18)
 	p2_hp_label.add_theme_color_override("font_color", Color(0.3, 1, 0.3))
 	p2_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p2_area.add_child(p2_hp_label)
+
+	p2_hp_label_bg = ColorRect.new()
+	p2_hp_label_bg.custom_minimum_size = Vector2(180, 30)
+	p2_hp_label_bg.color = Color(0, 0, 0, 0.8)
+
+	var p2_hp_container = MarginContainer.new()
+	p2_hp_container.custom_minimum_size = Vector2(180, 30)
+	p2_hp_container.add_child(p2_hp_label_bg)
+	p2_hp_container.add_child(p2_hp_label)
+	p2_area.add_child(p2_hp_container)
 
 	p2_hp_bar = ProgressBar.new()
-	p2_hp_bar.custom_minimum_size = Vector2(120, 16)
+	p2_hp_bar.custom_minimum_size = Vector2(240, 16)
 	p2_hp_bar.max_value = HP_MAX
 	p2_hp_bar.value = HP_MAX
 	p2_hp_bar.show_percentage = false
+	
+	var p2_bar_fill_style = StyleBoxFlat.new()
+	p2_bar_fill_style.bg_color = Color(0.1, 0.8, 0.1)
+	p2_hp_bar.add_theme_stylebox_override("fill", p2_bar_fill_style)
+	
+	var p2_bar_bg_style = StyleBoxFlat.new()
+	p2_bar_bg_style.bg_color = Color(0, 0, 0, 0.8)
+	p2_hp_bar.add_theme_stylebox_override("background", p2_bar_bg_style)
+	
 	p2_area.add_child(p2_hp_bar)
 
 	p2_rect = ColorRect.new()
-	p2_rect.custom_minimum_size = Vector2(120, 180)
-	p2_rect.color = Color(0.15, 0.35, 0.85)
+	p2_rect.custom_minimum_size = Vector2(240, 360)
+	p2_rect.color = Color(0, 0, 0, 0.0) # Transparent background container
+	
+	p2_sprite = TextureRect.new()
+	p2_sprite.custom_minimum_size = Vector2(240, 360)
+	p2_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	p2_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	p2_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	p2_sprite.texture = load("res://assets/aluno1.png")
+	p2_sprite.flip_h = false # Normal para a direita
+	p2_rect.add_child(p2_sprite)
+	
 	p2_area.add_child(p2_rect)
 
 	add_child(p2_area)
@@ -389,7 +512,16 @@ func _build_ui() -> void:
 	question_label.custom_minimum_size = Vector2(600, 50)
 	question_label.add_theme_font_size_override("font_size", 24)
 	question_label.add_theme_color_override("font_color", Color(1, 1, 1))
-	q_area.add_child(question_label)
+
+	var q_bg = ColorRect.new()
+	q_bg.custom_minimum_size = Vector2(600, 60)
+	q_bg.color = Color(0, 0, 0, 0.8)
+
+	var q_container = MarginContainer.new()
+	q_container.custom_minimum_size = Vector2(600, 60)
+	q_container.add_child(q_bg)
+	q_container.add_child(question_label)
+	q_area.add_child(q_container)
 
 	# Tags container (difficulty + category side by side)
 	var tags_hbox = HBoxContainer.new()
@@ -398,13 +530,33 @@ func _build_ui() -> void:
 
 	difficulty_label = Label.new()
 	difficulty_label.text = ""
+	difficulty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	difficulty_label.add_theme_font_size_override("font_size", 16)
-	tags_hbox.add_child(difficulty_label)
+	
+	var diff_bg = ColorRect.new()
+	diff_bg.custom_minimum_size = Vector2(120, 28)
+	diff_bg.color = Color(0, 0, 0, 0.8)
+	
+	var diff_container = MarginContainer.new()
+	diff_container.custom_minimum_size = Vector2(120, 28)
+	diff_container.add_child(diff_bg)
+	diff_container.add_child(difficulty_label)
+	tags_hbox.add_child(diff_container)
 
 	category_label = Label.new()
 	category_label.text = ""
+	category_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	category_label.add_theme_font_size_override("font_size", 16)
-	tags_hbox.add_child(category_label)
+	
+	var cat_bg = ColorRect.new()
+	cat_bg.custom_minimum_size = Vector2(120, 28)
+	cat_bg.color = Color(0, 0, 0, 0.8)
+	
+	var cat_container = MarginContainer.new()
+	cat_container.custom_minimum_size = Vector2(120, 28)
+	cat_container.add_child(cat_bg)
+	cat_container.add_child(category_label)
+	tags_hbox.add_child(cat_container)
 
 	q_area.add_child(tags_hbox)
 
@@ -412,23 +564,43 @@ func _build_ui() -> void:
 		var opt = Label.new()
 		opt.text = ""
 		opt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		opt.custom_minimum_size = Vector2(600, 36)
+		opt.custom_minimum_size = Vector2(440, 30)
 		opt.add_theme_font_size_override("font_size", 20)
 		opt.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
-		q_area.add_child(opt)
+
+		var opt_bg = ColorRect.new()
+		opt_bg.custom_minimum_size = Vector2(440, 30)
+		opt_bg.color = Color(0, 0, 0, 0.8)
+
+		var opt_container = MarginContainer.new()
+		opt_container.custom_minimum_size = Vector2(440, 30)
+		opt_container.add_theme_constant_override("margin_left", 80)
+		opt_container.add_theme_constant_override("margin_right", 80)
+		opt_container.add_child(opt_bg)
+		opt_container.add_child(opt)
+		q_area.add_child(opt_container)
 		option_labels.append(opt)
 
 	add_child(q_area)
 
 	# --- Controls hint ---
-	var hint = Label.new()
+	hint = Label.new()
 	hint.text = "P1: [1][2][3][4][5]    |    P2: [Q][W][E][R][T]"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position = Vector2(0, 610)
-	hint.size = Vector2(1152, 30)
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
-	add_child(hint)
+
+	var hint_bg = ColorRect.new()
+	hint_bg.custom_minimum_size = Vector2(1152, 30)
+	hint_bg.color = Color(0, 0, 0, 0.8)
+
+	var hint_container = MarginContainer.new()
+	hint_container.position = Vector2(0, 610)
+	hint_container.size = Vector2(1152, 30)
+	hint_container.custom_minimum_size = Vector2(1152, 30)
+	hint_container.add_child(hint_bg)
+	hint_container.add_child(hint)
+	add_child(hint_container)
 
 	# --- Game Over panel ---
 	gameover_panel = PanelContainer.new()
@@ -469,6 +641,18 @@ func _update_hp_ui() -> void:
 		p2_hp_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 
 
+func _update_student_textures() -> void:
+	# Determina qual slide mostrar baseado no estado atual
+	var should_show_aluno2 = showing_idle_animation
+	var tex_path = "res://assets/aluno2.png" if should_show_aluno2 else "res://assets/aluno1.png"
+	var tex = load(tex_path)
+	if tex:
+		if p1_sprite:
+			p1_sprite.texture = tex
+		if p2_sprite:
+			p2_sprite.texture = tex
+
+
 func _on_restart() -> void:
 	p1_hp = HP_MAX
 	p2_hp = HP_MAX
@@ -476,5 +660,6 @@ func _on_restart() -> void:
 	p1_hp_label.add_theme_color_override("font_color", Color(0.3, 1, 0.3))
 	p2_hp_label.add_theme_color_override("font_color", Color(0.3, 1, 0.3))
 	used_indices.clear()
+	failed_players.clear()
 	_update_hp_ui()
 	_start_question()

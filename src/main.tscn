@@ -1,6 +1,15 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/battle.gd" id="1_battle"]
+[ext_resource type="Texture2D" uid="uid://b04124737b37ff08d58591efc796900d" path="res://assets/cenario.png" id="2_cenario"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_battle")
+
+[node name="Background" type="TextureRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 648.0
+texture = ExtResource("2_cenario")
+expand_mode = 1
+stretch_mode = 0
+z_index = -100
