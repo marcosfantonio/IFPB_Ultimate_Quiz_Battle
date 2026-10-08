@@ -674,6 +674,21 @@ func _build_start_screen() -> void:
 		logo_rect.texture = logo_texture
 	start_screen_node.add_child(logo_rect)
 
+	var options_btn = TextureButton.new()
+	options_btn.texture_normal = load("res://assets/interface/opcoes.png")
+	options_btn.custom_minimum_size = Vector2(48, 48)
+	options_btn.size = Vector2(48, 48)
+	options_btn.ignore_texture_size = true
+	options_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	options_btn.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	options_btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	options_btn.position = Vector2(1152 - 48 - 12, 648 - 48 - 12)
+	options_btn.pressed.connect(func():
+		_play_sfx("res://assets/sounds/select.wav")
+		print("Opções clicadas!")
+	)
+	start_screen_node.add_child(options_btn)
+
 	start_prompt_label = Label.new()
 	start_prompt_label.text = "Pressione Enter para Iniciar"
 	start_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
