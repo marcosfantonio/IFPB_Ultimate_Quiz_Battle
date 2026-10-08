@@ -1,0 +1,85 @@
+{
+  "questions": [
+    {
+      "question": "A respeito do poema 'O Leão', que trata da morte e da eternidade, a qual é interpretado como uma espécie de 'poema de consolação' para quem vive com medo da morte:",
+      "options": ["...não há mais um único homem na Terra.", "...a vida termina apenas quando o sol se põe.", "...há algo que a própria morte não pode destruir.", "...só importa o amor e nada mais.", "...todos somos iguais perante à lei."],
+      "correct": 2,
+      "difficulty": "medium",
+      "category": "Português"
+    },
+    {
+      "question": "No poema 'A Riqueza', do poeta argentino Jorge Luis Borges, o narrador afirma:",
+      "options": ["...a riqueza é posse material de bens.", "...o ouro e a prata são vaidades humanas.", "...não há mais um único homem na Terra.", "...a vida termina apenas quando o sol se põe.", "...há algo que a própria morte não pode destruir."],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Português"
+    },
+    {
+      "question": "Sobre 'O Mágico', de Guimarães Rosa, analise o fragmento:",
+      "options": ["...a riqueza é posse material de bens.", "...o ouro e a prata são vaidades humanas.", "...não há mais um único homem na Terra.", "...a vida termina apenas quando o sol se põe.", "...há algo que a própria morte não pode destruir."],
+      "correct": 1,
+      "difficulty": "hard",
+      "category": "Português"
+    },
+    {
+      "question": "Em análise de algoritmos, o tempo worst-case de Merge Sort é:",
+      "options": ["O(n)", "O(n log n)", "O(n²)", "O(log n)", "O(1)"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Matemática"
+    },
+    {
+      "question": "Dada a equação diferencial dy/dx = y, com condição inicial y(0) = 1:",
+      "options": ["y(x) = x + 1", "y(x) = e^x", "y(x) = x²", "y(x) = ln(x)", "y(x) = sin(x)"],
+      "correct": 1,
+      "difficulty": "medium",
+      "category": "Física"
+    },
+    {
+      "question": "No contexto da literatura brasileira contemporânea, o termo 'modernismo de segunda geração' refere-se:",
+      "options": ["...ao movimento liderado por Oswald de Andrade.", "...aos poetas do grupo Modernista de 1922.", "...à ruptura com a tradição e busca pela liberdade expressiva.", "...ao romantismo brasileiro no século XIX.", "...ao regionalismo na poesia paulista."],
+      "correct": 2,
+      "difficulty": "hard",
+      "category": "Português"
+    },
+    {
+      "question": "Na análise de conjuntos, se A = {x ∈ ℕ | x² < 10}, então A contém:",
+      "options": ["{1, 2, 3}", "{1, 2, 3, 4}", "{0, 1, 2, 3}", "{1, 3}", "{1, 2}"
+    },
+    {
+      "question": "Qual das afirmativas sobre funções trigonométricas é correta:",
+      "options": ["sen(x) = cos(90° - x)", "tan²(x) + 1 ≠ sec²(x)", "cos(x) > sen(x) para todo x real", "arcsen(sin⁻¹(x)) = π/2", "csc(x) < cot(x) sempre válido"],
+      "correct": 0,
+      "difficulty": "medium",
+      "category": "Matemática"
+    },
+    {
+      "question": "Em física quântica, o princípio de incerteza de Heisenberg estabelece que:",
+      "options": ["é impossível conhecer simultaneamente posição e momento com precisão infinita", "partículas não existem quando não são observadas", "energia só pode ser emitida em múltiplos inteiros da energia do fóton", "o espaço-tempo é discreto na escala de Planck", "gravidade age mais forte que as outras forças fundamentais"],
+      "correct": 0,
+      "difficulty": "hard",
+      "category": "Física"
+    },
+    {
+      "question": "A transformada rápida de Fourier (FFT) é:",
+      "options": ["um algoritmo eficiente para calcular a Transformada Discreta de Fourier", "uma função trigonométrica periódica de período 2π", "uma distribuição estatística assintoticamente normal", "o resultado da expansão polinomial em base binária", "um método numérico para aproximar integrais definidas"],
+      "correct": 0,
+      "difficulty": "hard",
+      "category": "Matemática"
+    },
+    {
+      "question": "Na química orgânica, a hibridização sp³ em carbono resulta em:",
+      "options": ["geometria tetraédrica com ângulos de 109.5°", "configuração linear com ângulo de 180°", "estrutura plana trigonal com ângulos de 120°", "arranjo angular distorcido em torno do centro", "forma bent/côncava típica da água"],
+      "correct": 0,
+      "difficulty": "medium",
+      "category": "Química"
+    },
+    {
+      "question": "O ciclo de Krebs produz, por volta completa:",
+      "options": ["3 NADH, 1 FADH₂ e 1 GTP", "2 CO₂, 6 elétrons transportáveis e energia equivalente a ~1 ATP", "4 ATP brutos menos 2 ATP líquidos (investimento)", "1 oxaloacetato restaurado por fixação de carbono", "3 NADPH reduzidos para biossíntese lipídica"],
+      "correct": 0,
+      "difficulty": "medium",
+      "category": "Biologia"
+    }
+  ]
+}
