@@ -60,7 +60,7 @@ var hint: Label
 var start_screen_node: Control
 var start_prompt_label: Label
 var blink_timer: float = 0.0
-var custom_font = load("res://assets/upheavtt.ttf")
+var custom_font = load("res://assets/fontes/upheavtt.ttf")
 var bgm_player: AudioStreamPlayer
 var sfx_player: AudioStreamPlayer
 var idle_timer: float = 0.0
@@ -454,7 +454,7 @@ func _build_ui() -> void:
 	p1_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	p1_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	p1_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	p1_sprite.texture = load("res://assets/aluno1.png")
+	p1_sprite.texture = load("res://assets/player/aluno1.png")
 	p1_sprite.flip_h = true # Invertido para a esquerda
 	p1_rect.add_child(p1_sprite)
 	
@@ -513,7 +513,7 @@ func _build_ui() -> void:
 	p2_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	p2_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	p2_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	p2_sprite.texture = load("res://assets/aluno1.png")
+	p2_sprite.texture = load("res://assets/player/aluno1.png")
 	p2_sprite.flip_h = false # Normal para a direita
 	p2_rect.add_child(p2_sprite)
 	
@@ -669,7 +669,7 @@ func _build_start_screen() -> void:
 	logo_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	var logo_texture = load("res://assets/logo.png")
+	var logo_texture = load("res://assets/interface/logo.png")
 	if logo_texture:
 		logo_rect.texture = logo_texture
 	start_screen_node.add_child(logo_rect)
@@ -695,7 +695,7 @@ func _update_hp_ui() -> void:
 func _update_student_textures() -> void:
 	# Determina qual slide mostrar baseado no estado atual
 	var should_show_aluno2 = showing_idle_animation
-	var tex_path = "res://assets/aluno2.png" if should_show_aluno2 else "res://assets/aluno1.png"
+	var tex_path = "res://assets/player/aluno2.png" if should_show_aluno2 else "res://assets/player/aluno1.png"
 	var tex = load(tex_path)
 	if tex:
 		if p1_sprite:
