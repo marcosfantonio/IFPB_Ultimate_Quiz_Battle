@@ -17,6 +17,7 @@ var _projectile: Projectile
 var _hud: BattleHud
 var _game_over_panel: GameOverPanel
 var _start_screen: StartScreen
+var _options_screen: OptionsScreen
 
 
 func _ready() -> void:
@@ -66,6 +67,10 @@ func _create_ui() -> void:
 	_start_screen = StartScreen.new()
 	add_child(_start_screen)
 
+	_options_screen = OptionsScreen.new()
+	_options_screen.visible = false  # só aparece quando clicar em opções
+	add_child(_options_screen)
+
 
 func _connect_signals() -> void:
 	_match.hp_changed.connect(_hud.set_hp)
@@ -77,6 +82,7 @@ func _connect_signals() -> void:
 	_projectile.hit.connect(_on_projectile_hit)
 	_game_over_panel.restart_requested.connect(_on_restart_requested)
 	_start_screen.options_pressed.connect(_on_options_pressed)
+	_options_screen.back_requested.connect(_on_back_from_options)
 
 
 # ==================== INPUT / MENU ====================
@@ -94,7 +100,14 @@ func _on_start_requested() -> void:
 
 func _on_options_pressed() -> void:
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
-	print("Opções clicadas!")
+	_start_screen.visible = false
+	_options_screen.visible = true
+
+
+func _on_back_from_options() -> void:
+	_audio.play_sfx(GameAssets.Sfx.SELECT)
+	_options_screen.visible = false
+	_start_screen.visible = true
 
 
 func _on_answer_requested(player: int, option_index: int) -> void:
