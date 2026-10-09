@@ -107,6 +107,8 @@ func _on_options_pressed() -> void:
 
 func _on_back_from_options() -> void:
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
+	_options_screen.visible = false
+	_start_screen.visible = true
 
 
 func _on_answer_requested(player: int, option_index: int) -> void:

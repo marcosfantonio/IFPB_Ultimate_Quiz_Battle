@@ -7,6 +7,7 @@ signal back_requested
 var _music_slider: HSlider
 var _sfx_slider: HSlider
 var audio_manager: AudioManager = null
+var _sliders_connected: bool = false
 
 
 func _ready() -> void:
@@ -23,11 +24,12 @@ func _process(_delta: float) -> void:
 		back_requested.emit()
 
 	# Conectar sliders ao AudioManager assim que a tela aparecer.
-	if visible and audio_manager != null:
-		var sfx_cb = func(val): audio_manager.set_sfx_volume(val)
-		if not _sfx_slider.is_connected("value_changed", sfx_cb):
-			_music_slider.connect("value_changed", func(val: float): audio_manager.set_music_volume(val))
-			_sfx_slider.connect("value_changed", sfx_cb)
+	if visible and audio_manager != null and not _sliders_connected:
+		_music_slider.connect(
+				"value_changed", func(val: float): audio_manager.set_music_volume(val))
+		_sfx_slider.connect(
+				"value_changed", func(val: float): audio_manager.set_sfx_volume(val))
+		_sliders_connected = true
 
 
 func _build_overlay() -> void:
@@ -42,6 +44,13 @@ func _build_panel() -> void:
 	var panel := PanelContainer.new()
 	panel.position = (GameConfig.SCREEN_SIZE - Vector2(480, 360)) / 2.0
 	panel.custom_minimum_size = Vector2(480, 360)
+
+	# Fundo do container com 95% de opacidade
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0, 0, 0, 0.95)
+	bg_style.set_border_width_all(2)
+	bg_style.border_color = Color(1, 1, 1, 0.3)
+	panel.add_theme_stylebox_override("panel", bg_style)
 
 	var vbox := VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -65,11 +74,18 @@ func _build_panel() -> void:
 	sfx_row.set("theme_overrides/font_color", Color(1, 0.84, 0.0))
 	vbox.add_child(sfx_row)
 
-	# Botão Voltar
+	# Botão Voltar - fundo branco com texto preto
 	var back_button := Button.new()
 	back_button.text = "Voltar"
 	back_button.custom_minimum_size = Vector2(200, 45)
 	back_button.add_theme_font_size_override("font_size", 18)
+	back_button.set("theme_overrides/font_color", Color.BLACK)
+	var btn_style := StyleBoxFlat.new()
+	btn_style.bg_color = Color.WHITE
+	btn_style.set_border_width_all(2)
+	btn_style.border_color = Color(0, 0, 0, 0.4)
+	back_button.add_theme_stylebox_override("normal", btn_style)
+
 	back_button.pressed.connect(func() -> void: back_requested.emit())
 	vbox.add_child(back_button)
 
