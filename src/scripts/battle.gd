@@ -69,6 +69,7 @@ func _create_ui() -> void:
 
 	_options_screen = OptionsScreen.new()
 	_options_screen.visible = false  # só aparece quando clicar em opções
+	_options_screen.audio_manager = _audio
 	add_child(_options_screen)
 
 
@@ -106,8 +107,6 @@ func _on_options_pressed() -> void:
 
 func _on_back_from_options() -> void:
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
-	_options_screen.visible = false
-	_start_screen.visible = true
 
 
 func _on_answer_requested(player: int, option_index: int) -> void:

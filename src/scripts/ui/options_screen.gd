@@ -6,6 +6,7 @@ signal back_requested
 
 var _music_slider: HSlider
 var _sfx_slider: HSlider
+var audio_manager: AudioManager = null
 
 
 func _ready() -> void:
@@ -20,6 +21,13 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel"):
 		back_requested.emit()
+
+	# Conectar sliders ao AudioManager assim que a tela aparecer.
+	if visible and audio_manager != null:
+		var sfx_cb = func(val): audio_manager.set_sfx_volume(val)
+		if not _sfx_slider.is_connected("value_changed", sfx_cb):
+			_music_slider.connect("value_changed", func(val: float): audio_manager.set_music_volume(val))
+			_sfx_slider.connect("value_changed", sfx_cb)
 
 
 func _build_overlay() -> void:
