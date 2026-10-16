@@ -17,6 +17,7 @@ static func create() -> LabelPlate:
 
 	var width := GameConfig.SCREEN_SIZE.x
 	var plate := LabelPlate.create(Vector2(width, HEIGHT), 16, Color(0.5, 0.5, 0.6))
+	plate.z_index = 11  # fica acima dos sprites dos jogadores
 	plate.set_text("    |    ".join(parts))
 	plate.position = Vector2(0, POSITION_Y)
 	plate.size = Vector2(width, HEIGHT)

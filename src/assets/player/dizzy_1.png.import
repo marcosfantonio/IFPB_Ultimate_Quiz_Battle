@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2ekfx8e82u0h"
-path="res://.godot/imported/aluno1.png-989d2d0342115e41ff07734ba2218b44.ctex"
+uid="uid://ciuerkq0bqnqj"
+path="res://.godot/imported/dizzy_1.png-ee6b346d2cc248ac70b2da70669f2f14.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/aluno1.png"
-dest_files=["res://.godot/imported/aluno1.png-989d2d0342115e41ff07734ba2218b44.ctex"]
+source_file="res://assets/player/dizzy_1.png"
+dest_files=["res://.godot/imported/dizzy_1.png-ee6b346d2cc248ac70b2da70669f2f14.ctex"]
 
 [params]
 

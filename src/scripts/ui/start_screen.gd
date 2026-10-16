@@ -4,9 +4,15 @@ extends Control
 ## Quem a instancia decide quando removê-la (queue_free).
 
 signal options_pressed
+signal battle_requested
+signal creator_requested
 
 var _prompt_label: Label
+var _menu_container: VBoxContainer
+var _menu_arrows: Array[Label] = []
 var _blink_time: float = 0.0
+var menu_open: bool = false
+var _selected_option: int = 0
 
 
 func _ready() -> void:
@@ -17,6 +23,7 @@ func _ready() -> void:
 	_build_logo()
 	_build_options_button()
 	_build_prompt()
+	_build_main_menu()
 	UITheme.apply_font(self)
 
 
@@ -68,3 +75,71 @@ func _build_prompt() -> void:
 	_prompt_label.add_theme_font_size_override("font_size", 28)
 	_prompt_label.add_theme_color_override("font_color", Color(1, 0.84, 0.0))
 	add_child(_prompt_label)
+
+
+func _build_main_menu() -> void:
+	_menu_container = VBoxContainer.new()
+	_menu_container.position = Vector2(0, 460)
+	_menu_container.size = Vector2(GameConfig.SCREEN_SIZE.x, 112)
+	_menu_container.add_theme_constant_override("separation", 8)
+	_menu_container.visible = false
+	add_child(_menu_container)
+
+	for option_text in ["Nova Batalha", "Criador de Questoes"]:
+		var row := HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 8)
+		var arrow := Label.new()
+		arrow.text = ""
+		arrow.custom_minimum_size = Vector2(36, 42)
+		arrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		arrow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		arrow.add_theme_font_size_override("font_size", 28)
+		arrow.add_theme_color_override("font_color", Color(1, 0.82, 0.1))
+		_menu_arrows.append(arrow)
+		row.add_child(arrow)
+
+		var label := Label.new()
+		label.text = option_text
+		label.custom_minimum_size = Vector2(0, 42)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 24)
+		label.add_theme_color_override("font_color", Color.WHITE)
+		row.add_child(label)
+		var right_spacer := Control.new()
+		right_spacer.custom_minimum_size = Vector2(36, 42)
+		row.add_child(right_spacer)
+		_menu_container.add_child(row)
+	_update_menu_selection()
+
+
+func open_menu() -> void:
+	menu_open = true
+	_selected_option = 0
+	_prompt_label.visible = false
+	_menu_container.visible = true
+	_update_menu_selection()
+
+
+func move_selection(direction: int) -> void:
+	if not menu_open:
+		return
+	_selected_option = posmod(_selected_option + direction, _menu_arrows.size())
+	_update_menu_selection()
+
+
+func confirm_selection() -> void:
+	if not menu_open:
+		open_menu()
+		return
+	if _selected_option == 0:
+		battle_requested.emit()
+	else:
+		creator_requested.emit()
+
+
+func _update_menu_selection() -> void:
+	for index in _menu_arrows.size():
+		_menu_arrows[index].text = "▶" if index == _selected_option and menu_open else ""

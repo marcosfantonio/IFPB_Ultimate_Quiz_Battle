@@ -9,7 +9,6 @@ var _sfx_volume_db: float = 0.0
 
 func _ready() -> void:
 	_bgm_player = AudioStreamPlayer.new()
-	_bgm_player.stream = GameAssets.BGM_MAIN
 	add_child(_bgm_player)
 
 
@@ -36,8 +35,32 @@ func set_sfx_volume(linear_value: float) -> void:
 
 # ==================== PLAYBACK ====================
 
-func play_bgm() -> void:
+func play_menu_bgm() -> void:
+	_play_bgm(GameAssets.BGM_MENU, true)
+
+
+func play_battle_intro_bgm() -> void:
+	_play_bgm(GameAssets.BGM_BATTLE_START, false)
+
+
+func play_battle_bgm() -> void:
+	_play_bgm(GameAssets.BGM_BATTLE, true)
+
+
+func play_battle_lose_bgm() -> void:
+	_play_bgm(GameAssets.BGM_BATTLE_LOSE, false)
+
+
+func stop_bgm() -> void:
+	if _bgm_player != null:
+		_bgm_player.stop()
+
+
+func _play_bgm(stream: AudioStreamMP3, loop: bool) -> void:
 	if _bgm_player != null and is_inside_tree():
+		_bgm_player.stop()
+		stream.loop = loop
+		_bgm_player.stream = stream
 		_bgm_player.volume_db = _music_volume_db
 		_bgm_player.play()
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://oivr0qgje5kc"
-path="res://.godot/imported/aluno2.png-81b064487dacac4114b013ed78aad1cd.ctex"
+uid="uid://drmt3e8g6oos6"
+path="res://.godot/imported/hurt.png-4b4dc235cb136ed76ea9f0afc004761a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/aluno2.png"
-dest_files=["res://.godot/imported/aluno2.png-81b064487dacac4114b013ed78aad1cd.ctex"]
+source_file="res://assets/player/hurt.png"
+dest_files=["res://.godot/imported/hurt.png-4b4dc235cb136ed76ea9f0afc004761a.ctex"]
 
 [params]
 

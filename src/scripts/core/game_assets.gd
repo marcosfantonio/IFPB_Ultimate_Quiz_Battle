@@ -6,12 +6,23 @@ enum Sfx { SELECT, CORRECT, WRONG, NEW_QUESTION, HIT }
 
 const FONT = preload("res://assets/fontes/upheavtt.ttf")
 
-const TEX_STUDENT_IDLE = preload("res://assets/player/aluno1.png")
-const TEX_STUDENT_ALT = preload("res://assets/player/aluno2.png")
+const TEX_STUDENT_IDLE = preload("res://assets/player/idle_1.png")
+const TEX_STUDENT_ALT = preload("res://assets/player/looking_right.png")
+const TEX_STUDENT_HURT = preload("res://assets/player/hurt.png")
+const TEX_STUDENT_DIZZY_1 = preload("res://assets/player/dizzy_1.png")
+const TEX_STUDENT_DIZZY_2 = preload("res://assets/player/dizzy_2.png")
+const TEX_STUDENT_PREPARING_1 = preload("res://assets/player/preparing_1.png")
+const TEX_STUDENT_PREPARING_2 = preload("res://assets/player/preparing_2.png")
+const TEX_STUDENT_PREPARING_3 = preload("res://assets/player/preparing_3.png")
+const TEX_STUDENT_THROW = preload("res://assets/player/throw.png")
+const TEX_PAPER_BALL = preload("res://assets/objects/bola_papel.png")
 const TEX_LOGO = preload("res://assets/interface/logo.png")
 const TEX_OPTIONS_ICON = preload("res://assets/interface/opcoes.png")
 
-const BGM_MAIN = preload("res://assets/sounds/main_theme.mp3")
+const BGM_MENU = preload("res://assets/musics/menu_theme.mp3")
+const BGM_BATTLE_START = preload("res://assets/musics/battle_start.mp3")
+const BGM_BATTLE = preload("res://assets/musics/battle_theme.mp3")
+const BGM_BATTLE_LOSE = preload("res://assets/musics/battle_ending.mp3")
 
 const SFX_STREAMS = {
 	Sfx.SELECT: preload("res://assets/sounds/select.wav"),

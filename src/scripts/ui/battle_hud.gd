@@ -4,6 +4,7 @@ extends Control
 ## para mostrar/esconder tudo de uma vez.
 
 var question_panel: QuestionPanel
+var _controls_hint: Control
 
 var _player_panels: Dictionary = {}
 
@@ -20,9 +21,9 @@ func _ready() -> void:
 	question_panel = QuestionPanel.new()
 	add_child(question_panel)
 
-	var hint := ControlsHint.create()
-	add_child(hint)
-	UITheme.apply_font(hint)
+	_controls_hint = ControlsHint.create()
+	add_child(_controls_hint)
+	UITheme.apply_font(_controls_hint)
 
 
 func get_panel(player: int) -> PlayerPanel:
@@ -36,3 +37,10 @@ func set_hp(player: int, value: float) -> void:
 func set_alt_pose(alt_pose: bool) -> void:
 	for panel in _player_panels.values():
 		panel.set_alt_pose(alt_pose)
+
+
+func set_intro_mode(active: bool) -> void:
+	question_panel.visible = not active
+	_controls_hint.visible = not active
+	for panel in _player_panels.values():
+		panel.set_intro_mode(active)

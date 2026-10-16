@@ -5,21 +5,30 @@ extends VBoxContainer
 const OPTION_NORMAL = Color(1, 1, 1, 1)
 const OPTION_CORRECT = Color(0.2, 1, 0.3, 1)
 const OPTION_WRONG = Color(1, 0.2, 0.2, 1)
+const PANEL_WIDTH = 600.0
+const OPTION_WIDTH = 520.0
+const QUESTION_FONT_SIZE = 22
+const OPTION_FONT_SIZE = 17
+const GRID_GAP = 8
+const OPTION_SIDE_MARGIN = 12.0
 
 var _question_plate: LabelPlate
 var _difficulty_plate: LabelPlate
 var _category_plate: LabelPlate
 var _option_plates: Array[LabelPlate] = []
+var _options_grid: GridContainer
+var _tags: HBoxContainer
 
 
 func _ready() -> void:
-	position = Vector2(276, 30)
-	size = Vector2(600, 300)
-	add_theme_constant_override("separation", 12)
+	position = Vector2.ZERO
+	size = GameConfig.SCREEN_SIZE
+	add_theme_constant_override("separation", 8)
 
 	_build_question_plate()
 	_build_tags()
 	_build_options()
+	_center_horizontally()
 	UITheme.apply_font(self)
 
 
@@ -45,6 +54,10 @@ func show_question(question: Question) -> void:
 			plate.visible = true
 		else:
 			plate.visible = false
+			continue
+		_resize_option_plate(plate)
+	_layout_vertically()
+	_center_horizontally()
 	reset_highlights()
 
 
@@ -63,25 +76,70 @@ func reset_highlights() -> void:
 
 
 func _build_question_plate() -> void:
-	_question_plate = LabelPlate.create(Vector2(600, 60), 24, Color.WHITE, Vector2(600, 50))
+	_question_plate = LabelPlate.create(Vector2(PANEL_WIDTH, 60), QUESTION_FONT_SIZE, Color.WHITE, Vector2(PANEL_WIDTH, 50))
 	_question_plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_question_plate.label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_question_plate)
 
 
 func _build_tags() -> void:
-	var tags := HBoxContainer.new()
-	tags.alignment = BoxContainer.ALIGNMENT_CENTER
-	tags.add_theme_constant_override("separation", 20)
+	_tags = HBoxContainer.new()
+	_tags.alignment = BoxContainer.ALIGNMENT_CENTER
+	_tags.add_theme_constant_override("separation", 20)
 
 	_difficulty_plate = LabelPlate.create(Vector2(120, 28), 16)
 	_category_plate = LabelPlate.create(Vector2(120, 28), 16)
-	tags.add_child(_difficulty_plate)
-	tags.add_child(_category_plate)
-	add_child(tags)
+	_tags.add_child(_difficulty_plate)
+	_tags.add_child(_category_plate)
+	add_child(_tags)
 
 
 func _build_options() -> void:
+	_options_grid = GridContainer.new()
+	_options_grid.columns = 1
+	_options_grid.add_theme_constant_override("h_separation", GRID_GAP)
+	_options_grid.add_theme_constant_override("v_separation", GRID_GAP)
 	for _i in GameConfig.MAX_OPTIONS:
-		var plate := LabelPlate.create(Vector2(440, 30), 20, Color(0.85, 0.85, 0.85), Vector2(440, 30), 80)
+		var plate_width := OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0
+		var plate := LabelPlate.create(Vector2(plate_width, 42), OPTION_FONT_SIZE, Color(0.85, 0.85, 0.85), Vector2.ZERO, int(OPTION_SIDE_MARGIN))
+		plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		plate.label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		_option_plates.append(plate)
-		add_child(plate)
+		_options_grid.add_child(plate)
+	add_child(_options_grid)
+
+
+func _resize_option_plate(plate: LabelPlate) -> void:
+	var usable_width: float = OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0
+	var estimated_lines: int = maxi(1, ceili(float(plate.label.text.length()) * OPTION_FONT_SIZE * 0.55 / usable_width))
+	var height: float = maxf(42.0, estimated_lines * (OPTION_FONT_SIZE + 6.0) + 12.0)
+	var plate_size := Vector2(OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0, height)
+	plate.custom_minimum_size = plate_size
+	plate.background.custom_minimum_size = plate_size
+
+
+func _layout_vertically() -> void:
+	var question_lines: int = maxi(1, ceili(float(_question_plate.label.text.length()) * QUESTION_FONT_SIZE * 0.52 / PANEL_WIDTH))
+	var question_height: float = maxf(60.0, question_lines * (QUESTION_FONT_SIZE + 9.0) + 18.0)
+	_question_plate.custom_minimum_size.y = question_height
+	_question_plate.background.custom_minimum_size.y = question_height
+	var rows: int = _option_plates.size()
+	var row_heights: Array[float] = []
+	for row in rows:
+		var row_height: float = 42.0
+		if _option_plates[row].visible:
+			row_height = maxf(row_height, _option_plates[row].custom_minimum_size.y)
+		row_heights.append(row_height)
+	var content_height: float = question_height + 28.0 + 8.0 + 8.0
+	for row_height in row_heights:
+		content_height += row_height + GRID_GAP
+	position.y = 8.0
+
+
+func _center_horizontally() -> void:
+	# Ocupa a largura da tela; cada grupo usa seu tamanho mínimo e fica centralizado.
+	size.x = GameConfig.SCREEN_SIZE.x
+	_question_plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_tags.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_options_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

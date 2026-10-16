@@ -20,7 +20,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("ui_cancel"):
+	if visible and Input.is_action_just_pressed("ui_cancel"):
 		back_requested.emit()
 
 	# Conectar sliders ao AudioManager assim que a tela aparecer.
@@ -41,50 +41,51 @@ func _build_overlay() -> void:
 
 
 func _build_panel() -> void:
+	var panel_size := Vector2(460, 320)
 	var panel := PanelContainer.new()
-	panel.position = (GameConfig.SCREEN_SIZE - Vector2(480, 360)) / 2.0
-	panel.custom_minimum_size = Vector2(480, 360)
+	panel.position = (GameConfig.SCREEN_SIZE - panel_size) / 2.0
+	panel.size = panel_size
+	panel.custom_minimum_size = panel_size
 
-	# Fundo do container com 95% de opacidade
 	var bg_style := StyleBoxFlat.new()
-	bg_style.bg_color = Color(0, 0, 0, 0.95)
-	bg_style.set_border_width_all(2)
-	bg_style.border_color = Color(1, 1, 1, 0.3)
+	bg_style.bg_color = Color(0.035, 0.055, 0.08, 0.97)
+	bg_style.set_border_width_all(3)
+	bg_style.border_color = Color(1, 0.78, 0.15, 0.9)
+	bg_style.set_content_margin_all(24.0)
 	panel.add_theme_stylebox_override("panel", bg_style)
 
 	var vbox := VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", 16)
 
-	# Título
-	var title = Label.new()
+	var title := Label.new()
 	title.text = "CONFIGURAÇÕES"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", Color.WHITE)
 	vbox.add_child(title)
 
-	# Música
-	var music_row = _build_slider_row("Música:")
-	music_row.set("theme_overrides/font_color", Color(1, 0.84, 0.0))
+	var music_row := _build_slider_row("Música:")
 	vbox.add_child(music_row)
 
-	# Efeitos Sonoros
-	var sfx_row = _build_slider_row("Efeitos Sonoros:")
-	sfx_row.set("theme_overrides/font_color", Color(1, 0.84, 0.0))
+	var sfx_row := _build_slider_row("Efeitos Sonoros:")
 	vbox.add_child(sfx_row)
 
-	# Botão Voltar - fundo branco com texto preto
 	var back_button := Button.new()
 	back_button.text = "Voltar"
-	back_button.custom_minimum_size = Vector2(200, 45)
+	back_button.custom_minimum_size = Vector2(150, 42)
+	back_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back_button.add_theme_font_size_override("font_size", 18)
-	back_button.set("theme_overrides/font_color", Color.BLACK)
-	var btn_style := StyleBoxFlat.new()
-	btn_style.bg_color = Color.WHITE
-	btn_style.set_border_width_all(2)
-	btn_style.border_color = Color(0, 0, 0, 0.4)
-	back_button.add_theme_stylebox_override("normal", btn_style)
+	back_button.add_theme_color_override("font_color", Color(1, 0.84, 0.25))
+	back_button.add_theme_color_override("font_hover_color", Color.WHITE)
+	back_button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	var normal_style := _button_style(Color(0.08, 0.12, 0.17), Color(1, 0.78, 0.15))
+	var hover_style := _button_style(Color(0.15, 0.24, 0.29), Color(0.2, 0.85, 0.75))
+	var pressed_style := _button_style(Color(0.04, 0.08, 0.12), Color(0.2, 0.85, 0.75))
+	back_button.add_theme_stylebox_override("normal", normal_style)
+	back_button.add_theme_stylebox_override("hover", hover_style)
+	back_button.add_theme_stylebox_override("focus", normal_style)
+	back_button.add_theme_stylebox_override("pressed", pressed_style)
 
 	back_button.pressed.connect(func() -> void: back_requested.emit())
 	vbox.add_child(back_button)
@@ -102,6 +103,7 @@ func _build_slider_row(label_text: String) -> HBoxContainer:
 	label.text = label_text
 	label.custom_minimum_size = Vector2(140, 30)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", Color(1, 0.84, 0.25))
 	hbox.add_child(label)
 
 	var slider := HSlider.new()
@@ -118,3 +120,12 @@ func _build_slider_row(label_text: String) -> HBoxContainer:
 		_sfx_slider = slider
 
 	return hbox
+
+
+func _button_style(background: Color, border: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = background
+	style.set_border_width_all(2)
+	style.border_color = border
+	style.set_content_margin_all(8.0)
+	return style

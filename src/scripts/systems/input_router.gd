@@ -5,6 +5,7 @@ extends Node
 
 signal start_requested
 signal answer_requested(player: int, option_index: int)
+signal menu_move_requested(direction: int)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -13,6 +14,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
 		start_requested.emit()
+		return
+	if event.keycode == KEY_UP:
+		menu_move_requested.emit(-1)
+		return
+	if event.keycode == KEY_DOWN:
+		menu_move_requested.emit(1)
 		return
 
 	for player in GameConfig.PLAYERS:
