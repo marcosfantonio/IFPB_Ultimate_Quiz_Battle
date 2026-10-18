@@ -10,6 +10,9 @@ var _phase: GamePhase.State = GamePhase.State.START_SCREEN
 
 var _match := MatchState.new()
 var _repository := QuestionRepository.new()
+var _correct_counts: Dictionary = {1: 0, 2: 0}
+var _error_counts: Dictionary = {1: 0, 2: 0}
+var _debug_lethal_pending: bool = false
 
 var _audio: AudioManager
 var _round: RoundController
@@ -22,10 +25,17 @@ var _question_creator_screen: QuestionCreatorScreen
 var _battle_setup_screen: BattleSetupScreen
 var _battle_intro_screen: BattleIntroScreen
 var _battle_results_screen: BattleResultsScreen
+var _menu_transitioning: bool = false
+var _background: TextureRect
+var _screen_transition_overlay: ColorRect
+
+const CREATOR_TRANSITION_TIME = 1.5
 
 
 func _ready() -> void:
 	z_index = 10
+	_background = get_node("Background") as TextureRect
+	_set_menu_background()
 	_repository.load_from_file(GameConfig.QUESTIONS_PATH)
 
 	_create_systems()
@@ -48,6 +58,7 @@ func _create_systems() -> void:
 	var input_router := InputRouter.new()
 	input_router.start_requested.connect(_on_start_requested)
 	input_router.menu_move_requested.connect(_on_menu_move_requested)
+	input_router.debug_win_requested.connect(_on_debug_win_requested)
 	input_router.answer_requested.connect(_on_answer_requested)
 	add_child(input_router)
 
@@ -96,6 +107,15 @@ func _create_ui() -> void:
 	_battle_results_screen.visible = false
 	add_child(_battle_results_screen)
 
+	_screen_transition_overlay = ColorRect.new()
+	_screen_transition_overlay.position = Vector2.ZERO
+	_screen_transition_overlay.size = GameConfig.SCREEN_SIZE
+	_screen_transition_overlay.color = Color(0, 0, 0, 0)
+	_screen_transition_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_screen_transition_overlay.z_index = 2000
+	_screen_transition_overlay.visible = false
+	add_child(_screen_transition_overlay)
+
 
 func _connect_signals() -> void:
 	_match.hp_changed.connect(_hud.set_hp)
@@ -111,6 +131,7 @@ func _connect_signals() -> void:
 	_question_creator_screen.back_requested.connect(_on_back_from_creator)
 	_battle_setup_screen.start_requested.connect(_on_battle_setup_started)
 	_battle_setup_screen.back_requested.connect(_on_back_from_battle_setup)
+	_question_creator_screen.bank_selected.connect(_on_question_bank_selected)
 	_battle_intro_screen.player_name_revealed.connect(_on_intro_player_name_revealed)
 	_battle_intro_screen.battle_reveal_started.connect(_on_battle_reveal_started)
 	_battle_intro_screen.finished.connect(_on_battle_intro_finished)
@@ -126,17 +147,28 @@ func _connect_start_screen_signals() -> void:
 # ==================== INPUT / MENU ====================
 
 func _on_start_requested() -> void:
-	if _phase != GamePhase.State.START_SCREEN:
+	if _phase != GamePhase.State.START_SCREEN or _menu_transitioning:
 		return
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_start_screen.confirm_selection()
 
 
 func _on_menu_move_requested(direction: int) -> void:
-	if _phase != GamePhase.State.START_SCREEN or not _start_screen.menu_open:
+	if _phase != GamePhase.State.START_SCREEN or _menu_transitioning or not _start_screen.menu_open:
 		return
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_start_screen.move_selection(direction)
+
+
+func _on_debug_win_requested() -> void:
+	if _phase != GamePhase.State.QUESTION or _projectile.is_flying():
+		return
+	var correct_index: int = _round.current_question.correct_index
+	_hud.question_panel.highlight_answer(correct_index, correct_index)
+	_audio.play_sfx(GameAssets.Sfx.CORRECT)
+	FloatingText.spawn(self, _hud.get_panel(1).get_floating_text_origin(), "ACERTOU!", Color(0.2, 1, 0.3))
+	_debug_lethal_pending = true
+	_launch_projectile(1)
 
 
 func _on_new_battle_requested() -> void:
@@ -150,6 +182,11 @@ func _on_new_battle_requested() -> void:
 func _on_battle_setup_started(player_1_name: String, player_1_team: String, player_2_name: String, player_2_team: String) -> void:
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_audio.play_battle_intro_bgm()
+	_background.texture = GameAssets.TEX_BATTLE_BACKGROUND
+	for player in GameConfig.PLAYERS:
+		_correct_counts[player] = 0
+		_error_counts[player] = 0
+	_debug_lethal_pending = false
 	_hud.get_panel(1).set_identity(player_1_name, player_1_team)
 	_hud.get_panel(2).set_identity(player_2_name, player_2_team)
 	_battle_setup_screen.visible = false
@@ -184,19 +221,63 @@ func _on_back_from_battle_setup() -> void:
 
 
 func _on_creator_requested() -> void:
+	if _menu_transitioning:
+		return
+	_menu_transitioning = true
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
+	await _fade_entire_screen_to_black()
 	_start_screen.visible = false
+	_question_creator_screen.modulate.a = 1.0
 	_question_creator_screen.visible = true
+	_audio.play_question_maker_bgm()
+	await _fade_entire_screen_from_black()
+	_menu_transitioning = false
 
 
 func _on_back_from_creator() -> void:
+	await _return_from_creator()
+
+
+func _on_question_bank_selected(bank_name: String, questions: Array) -> void:
+	_repository.load_from_data({"name": bank_name, "questions": questions})
+	_repository.reset_history()
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
+	await _return_from_creator()
+
+
+func _return_from_creator() -> void:
+	if _menu_transitioning:
+		return
+	_menu_transitioning = true
+	await _fade_entire_screen_to_black()
 	_question_creator_screen.visible = false
+	_question_creator_screen.modulate.a = 1.0
+	_start_screen.modulate.a = 1.0
 	_start_screen.visible = true
 	_start_screen.open_menu()
+	_audio.play_menu_bgm()
+	await _fade_entire_screen_from_black()
+	_menu_transitioning = false
+
+
+func _fade_entire_screen_to_black() -> void:
+	_screen_transition_overlay.color = Color(0, 0, 0, 0)
+	_screen_transition_overlay.visible = true
+	var tween := create_tween()
+	tween.tween_property(_screen_transition_overlay, "color", Color(0, 0, 0, 1), CREATOR_TRANSITION_TIME)
+	await tween.finished
+
+
+func _fade_entire_screen_from_black() -> void:
+	var tween := create_tween()
+	tween.tween_property(_screen_transition_overlay, "color", Color(0, 0, 0, 0), CREATOR_TRANSITION_TIME)
+	await tween.finished
+	_screen_transition_overlay.visible = false
 
 
 func _on_options_pressed() -> void:
+	if _menu_transitioning:
+		return
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_start_screen.visible = false
 	_options_screen.visible = true
@@ -230,10 +311,12 @@ func _on_answer_resolved(player: int, option_index: int, correct: bool) -> void:
 	var origin := _hud.get_panel(player).get_floating_text_origin()
 
 	if correct:
+		_correct_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.CORRECT)
 		FloatingText.spawn(self, origin, "ACERTOU!", Color(0.2, 1, 0.3))
 		_launch_projectile(player)
 	else:
+		_error_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.WRONG)
 		FloatingText.spawn(self, origin, "ERROU!", Color(1, 0.2, 0.2))
 
@@ -262,9 +345,12 @@ func _launch_projectile(attacker: int) -> void:
 func _on_projectile_hit(attacker: int) -> void:
 	_audio.play_sfx(GameAssets.Sfx.HIT)
 	var victim := GameConfig.opponent_of(attacker)
-	_match.apply_damage(victim, GameConfig.DAMAGE)
+	var is_lethal_hit: bool = _debug_lethal_pending or _match.get_hp(victim) <= GameConfig.DAMAGE
+	var damage: float = _match.get_hp(victim) if _debug_lethal_pending else GameConfig.DAMAGE
+	_debug_lethal_pending = false
+	_match.apply_damage(victim, damage)
 	_hud.get_panel(victim).flash()
-	_hud.get_panel(victim).play_hit_animation()
+	_hud.get_panel(victim).play_hit_animation(is_lethal_hit)
 	_hud.get_panel(attacker).finish_throw()
 
 	if _match.is_over():
@@ -274,7 +360,9 @@ func _on_projectile_hit(attacker: int) -> void:
 		_audio.play_battle_lose_bgm()
 		var winner := _match.get_winner()
 		var winning_team: String = "EMPATE" if winner == 0 else _hud.get_panel(winner).get_team_name()
-		_battle_results_screen.play(winning_team)
+		var correct_count: int = _correct_counts[winner] if winner != 0 else _correct_counts[1] + _correct_counts[2]
+		var error_count: int = _error_counts[winner] if winner != 0 else _error_counts[1] + _error_counts[2]
+		_battle_results_screen.play(winning_team, correct_count, error_count)
 		return
 
 	await get_tree().create_timer(GameConfig.NEXT_QUESTION_DELAY).timeout
@@ -285,6 +373,8 @@ func _on_restart_requested() -> void:
 	_game_over_panel.visible = false
 	_match.reset()
 	_repository.reset_history()
+	for player in GameConfig.PLAYERS:
+		_hud.get_panel(player).finish_dizzy_animation()
 	_round.start_round()
 
 
@@ -293,13 +383,21 @@ func _on_battle_results_finished() -> void:
 	_game_over_panel.visible = false
 	_match.reset()
 	_repository.reset_history()
+	_set_menu_background()
 	_start_screen = StartScreen.new()
 	_start_screen.modulate.a = 0.0
 	add_child(_start_screen)
 	_connect_start_screen_signals()
+	for player in GameConfig.PLAYERS:
+		_hud.get_panel(player).finish_dizzy_animation()
 	_audio.play_menu_bgm()
 	var menu_fade := create_tween()
 	menu_fade.tween_property(_start_screen, "modulate:a", 1.0, 1.0)
 	_battle_results_screen.fade_to_menu(1.0)
 	await menu_fade.finished
 	_phase = GamePhase.State.START_SCREEN
+
+
+func _set_menu_background() -> void:
+	if _background != null:
+		_background.texture = GameAssets.TEX_MENU_BACKGROUND

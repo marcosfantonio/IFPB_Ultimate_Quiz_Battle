@@ -5,7 +5,7 @@ extends RefCounted
 
 
 static func apply_font(node: Node) -> void:
-	if node is Label or node is Button or node is LineEdit:
+	if node is Label or node is Button or node is LineEdit or node is TextEdit:
 		node.add_theme_font_override("font", GameAssets.FONT)
 	for child in node.get_children():
 		apply_font(child)

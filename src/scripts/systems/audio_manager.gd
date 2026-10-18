@@ -39,6 +39,10 @@ func play_menu_bgm() -> void:
 	_play_bgm(GameAssets.BGM_MENU, true)
 
 
+func play_question_maker_bgm() -> void:
+	_play_bgm(GameAssets.BGM_QUESTION_MAKER, true)
+
+
 func play_battle_intro_bgm() -> void:
 	_play_bgm(GameAssets.BGM_BATTLE_START, false)
 

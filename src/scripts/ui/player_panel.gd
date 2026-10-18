@@ -93,7 +93,7 @@ func play_throw() -> void:
 	_set_sprite_texture(GameAssets.TEX_STUDENT_THROW)
 
 
-func play_hit_animation() -> void:
+func play_hit_animation(hold_until_end: bool = false) -> void:
 	_animation_id += 1
 	var animation_id := _animation_id
 	_animating = true
@@ -101,17 +101,23 @@ func play_hit_animation() -> void:
 	await get_tree().create_timer(HURT_FRAME_DURATION).timeout
 	var elapsed: float = 0.0
 	var show_first: bool = true
-	while elapsed < DIZZY_DURATION and animation_id == _animation_id:
+	while animation_id == _animation_id and (hold_until_end or elapsed < DIZZY_DURATION):
 		_set_sprite_texture(GameAssets.TEX_STUDENT_DIZZY_1 if show_first else GameAssets.TEX_STUDENT_DIZZY_2)
 		show_first = not show_first
 		await get_tree().create_timer(ANIMATION_FRAME_DURATION).timeout
 		elapsed += ANIMATION_FRAME_DURATION
-	if animation_id == _animation_id:
+	if animation_id == _animation_id and not hold_until_end:
 		_animating = false
 		_set_sprite_texture(GameAssets.TEX_STUDENT_IDLE)
 
 
 func finish_throw() -> void:
+	_animation_id += 1
+	_animating = false
+	_set_sprite_texture(GameAssets.TEX_STUDENT_IDLE)
+
+
+func finish_dizzy_animation() -> void:
 	_animation_id += 1
 	_animating = false
 	_set_sprite_texture(GameAssets.TEX_STUDENT_IDLE)

@@ -28,6 +28,14 @@ func load_from_file(path: String) -> void:
 		_append_from({"questions": FALLBACK_QUESTIONS})
 
 
+func load_from_data(data: Variant) -> void:
+	_questions.clear()
+	_used_indices.clear()
+	_append_from(data)
+	if _questions.is_empty():
+		push_warning("QuestionRepository: banco selecionado sem questões válidas.")
+
+
 func size() -> int:
 	return _questions.size()
 

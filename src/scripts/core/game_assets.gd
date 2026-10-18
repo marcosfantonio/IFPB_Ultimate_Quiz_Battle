@@ -18,8 +18,12 @@ const TEX_STUDENT_THROW = preload("res://assets/player/throw.png")
 const TEX_PAPER_BALL = preload("res://assets/objects/bola_papel.png")
 const TEX_LOGO = preload("res://assets/interface/logo.png")
 const TEX_OPTIONS_ICON = preload("res://assets/interface/opcoes.png")
+const TEX_MENU_BACKGROUND = preload("res://assets/background/menu.png")
+const TEX_CREATOR_BACKGROUND = TEX_MENU_BACKGROUND
+const TEX_BATTLE_BACKGROUND = preload("res://assets/background/cenario.png")
 
 const BGM_MENU = preload("res://assets/musics/menu_theme.mp3")
+const BGM_QUESTION_MAKER = preload("res://assets/musics/question_maker.mp3")
 const BGM_BATTLE_START = preload("res://assets/musics/battle_start.mp3")
 const BGM_BATTLE = preload("res://assets/musics/battle_theme.mp3")
 const BGM_BATTLE_LOSE = preload("res://assets/musics/battle_ending.mp3")

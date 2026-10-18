@@ -38,6 +38,7 @@ const IDLE_WAIT_RANGE = Vector2(3.0, 7.0)  # quanto tempo espera até trocar de 
 # --- Dados ---
 const QUESTIONS_PATH = "res://data/questions.json"
 const MAX_OPTIONS = 5
+const OPTIONS_PER_QUESTION = 3
 
 # --- Jogadores ---
 const PLAYERS = {
@@ -46,8 +47,8 @@ const PLAYERS = {
 		"color": Color(1, 0.35, 0.35),
 		"win_text": "🔴 PLAYER 1 VENCEU!",
 		"win_color": Color(1, 0.3, 0.3),
-		"keys": [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5],
-		"key_labels": ["1", "2", "3", "4", "5"],
+		"keys": [KEY_1, KEY_2, KEY_3],
+		"key_labels": ["1", "2", "3"],
 		"panel_position": Vector2(-20, 190),
 		"flip_h": false,
 		"faces_right": true,
@@ -57,8 +58,8 @@ const PLAYERS = {
 		"color": Color(0.35, 0.55, 1),
 		"win_text": "🔵 PLAYER 2 VENCEU!",
 		"win_color": Color(0.3, 0.6, 1),
-		"keys": [KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T],
-		"key_labels": ["Q", "W", "E", "R", "T"],
+		"keys": [KEY_Q, KEY_W, KEY_E],
+		"key_labels": ["Q", "W", "E"],
 		"panel_position": Vector2(812, 190),
 		"flip_h": true,
 		"faces_right": false,

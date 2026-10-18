@@ -6,10 +6,19 @@ extends Node
 signal start_requested
 signal answer_requested(player: int, option_index: int)
 signal menu_move_requested(direction: int)
+signal debug_win_requested
+
+const DEBUG_COMMAND = "VENCEU"
+const DEBUG_INPUT_TIMEOUT_MS = 1800
+
+var _debug_buffer: String = ""
+var _last_debug_key_time: int = 0
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	if _capture_debug_command(event.keycode):
 		return
 
 	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
@@ -28,3 +37,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		if option_index != -1:
 			answer_requested.emit(player, option_index)
 			return
+
+
+func _capture_debug_command(keycode: int) -> bool:
+	if keycode < KEY_A or keycode > KEY_Z:
+		_debug_buffer = ""
+		return false
+
+	var now: int = Time.get_ticks_msec()
+	if now - _last_debug_key_time > DEBUG_INPUT_TIMEOUT_MS:
+		_debug_buffer = ""
+	_last_debug_key_time = now
+
+	var character := String.chr(keycode).to_upper()
+	var candidate := _debug_buffer + character
+	if DEBUG_COMMAND.begins_with(candidate):
+		_debug_buffer = candidate
+		if _debug_buffer == DEBUG_COMMAND:
+			_debug_buffer = ""
+			debug_win_requested.emit()
+		return true
+
+	_debug_buffer = "V" if character == "V" else ""
+	return not _debug_buffer.is_empty()
