@@ -21,14 +21,23 @@ var _ko_label: Label
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	z_index = 950
-	_build_overlay()
-	_build_labels()
+	_overlay = $Overlay as ColorRect
+	_ko_label = $KOLabel as Label
+	_team_label = $TeamLabel as Label
+	_stats_row = $StatsRow as HBoxContainer
+	_correct_label = $StatsRow/CorrectLabel as Label
+	_errors_label = $StatsRow/ErrorsLabel as Label
+	_message_label = $MessageLabel as Label
 	UITheme.apply_font(self)
 
 
 func play(winning_team: String, correct_count: int, error_count: int) -> void:
 	visible = true
 	_overlay.color = Color(0, 0, 0, 0.88)
+	_ko_label.visible = true
+	_team_label.visible = true
+	_stats_row.visible = true
+	_message_label.visible = true
 	_team_label.text = "Equipe %s venceu!" % winning_team
 	_correct_label.text = "%d acertos" % correct_count
 	_errors_label.text = "%d erros" % error_count
@@ -76,66 +85,3 @@ func fade_to_menu(duration: float) -> void:
 	fade.tween_property(_overlay, "color", Color(0, 0, 0, 0), duration)
 	await fade.finished
 	visible = false
-
-
-func _build_overlay() -> void:
-	_overlay = ColorRect.new()
-	_overlay.size = GameConfig.SCREEN_SIZE
-	_overlay.color = Color(0, 0, 0, 0.88)
-	add_child(_overlay)
-
-
-func _build_labels() -> void:
-	_ko_label = Label.new()
-	_ko_label.text = "K.O."
-	_ko_label.position = Vector2(126, 230)
-	_ko_label.size = Vector2(900, 150)
-	_ko_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_ko_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_ko_label.add_theme_font_size_override("font_size", 112)
-	_ko_label.add_theme_color_override("font_color", Color(1, 0.18, 0.12))
-	_ko_label.visible = false
-	add_child(_ko_label)
-
-	_team_label = Label.new()
-	_team_label.position = Vector2(126, 230)
-	_team_label.size = Vector2(900, 90)
-	_team_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_team_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_team_label.add_theme_font_size_override("font_size", 38)
-	_team_label.add_theme_color_override("font_color", Color(1, 0.82, 0.1))
-	add_child(_team_label)
-
-	_stats_row = HBoxContainer.new()
-	_stats_row.position = Vector2(0, 330)
-	_stats_row.size = Vector2(GameConfig.SCREEN_SIZE.x, 48)
-	_stats_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	_stats_row.add_theme_constant_override("separation", 0)
-	var prefix := _create_stat_label("Venceu! com ", Color.WHITE)
-	_correct_label = _create_stat_label("0 acertos", Color(0.2, 1.0, 0.3))
-	var conjunction := _create_stat_label(" e ", Color.WHITE)
-	_errors_label = _create_stat_label("0 erros", Color(1.0, 0.25, 0.25))
-	_stats_row.add_child(prefix)
-	_stats_row.add_child(_correct_label)
-	_stats_row.add_child(conjunction)
-	_stats_row.add_child(_errors_label)
-	add_child(_stats_row)
-
-	_message_label = Label.new()
-	_message_label.text = "ÓTIMO JOGO!"
-	_message_label.position = Vector2(126, 395)
-	_message_label.size = Vector2(900, 70)
-	_message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_message_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_message_label.add_theme_font_size_override("font_size", 36)
-	_message_label.add_theme_color_override("font_color", Color.WHITE)
-	add_child(_message_label)
-
-
-func _create_stat_label(text: String, color: Color) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 24)
-	label.add_theme_color_override("font_color", color)
-	return label

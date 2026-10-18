@@ -1,3 +1,4 @@
+@tool
 class_name BattleHud
 extends Control
 ## Agrupa a interface de gameplay (jogadores, pergunta e dicas de teclas),
@@ -12,17 +13,15 @@ var _player_panels: Dictionary = {}
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	for id in GameConfig.PLAYERS:
-		var panel := PlayerPanel.new()
-		panel.setup(id)
-		add_child(panel)
-		_player_panels[id] = panel
-
-	question_panel = QuestionPanel.new()
-	add_child(question_panel)
-
-	_controls_hint = ControlsHint.create()
-	add_child(_controls_hint)
+	var panel_1 := $Player1 as PlayerPanel
+	panel_1.setup(1)
+	_player_panels[1] = panel_1
+	var panel_2 := $Player2 as PlayerPanel
+	panel_2.setup(2)
+	_player_panels[2] = panel_2
+	question_panel = $QuestionPanel as QuestionPanel
+	_controls_hint = $ControlsHint as LabelPlate
+	ControlsHint.configure(_controls_hint as LabelPlate)
 	UITheme.apply_font(_controls_hint)
 
 

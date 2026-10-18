@@ -1,3 +1,4 @@
+@tool
 class_name GameAssets
 extends RefCounted
 ## Todos os caminhos de assets em um lugar só.

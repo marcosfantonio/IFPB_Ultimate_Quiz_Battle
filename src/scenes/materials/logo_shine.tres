@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://shaders/logo_shine.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/shine_progress = -0.5
+shader_parameter/shine_intensity = 0.78
+shader_parameter/shine_width = 0.055
+shader_parameter/shine_feather = 0.012
+shader_parameter/companion_offset = 0.045
+shader_parameter/shine_color = Color(1, 0.78, 0.18, 1)

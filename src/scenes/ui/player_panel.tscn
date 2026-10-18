@@ -1,0 +1,89 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/player_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/player/idle_1.png" id="2_idle"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="3_theme"]
+
+[sub_resource type="StyleBoxFlat" id="IdentityPanel"]
+bg_color = Color(0, 0, 0, 0.88)
+
+[sub_resource type="StyleBoxFlat" id="HPFill"]
+bg_color = Color(0.1, 0.8, 0.1, 1)
+
+[sub_resource type="StyleBoxFlat" id="HPBackground"]
+bg_color = Color(0, 0, 0, 0.8)
+
+[node name="PlayerPanel" type="VBoxContainer"]
+z_index = 10
+theme = ExtResource("3_theme")
+theme_override_constants/separation = 4
+script = ExtResource("1_script")
+
+[node name="InfoRow" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(360, 0)
+
+[node name="LeftSpacer" type="Control" parent="InfoRow"]
+custom_minimum_size = Vector2(90, 1)
+
+[node name="InfoStack" type="VBoxContainer" parent="InfoRow"]
+custom_minimum_size = Vector2(180, 0)
+theme_override_constants/separation = 4
+
+[node name="IdentityPlate" type="PanelContainer" parent="InfoRow/InfoStack"]
+custom_minimum_size = Vector2(180, 56)
+theme_override_styles/panel = SubResource("IdentityPanel")
+
+[node name="IdentityStack" type="VBoxContainer" parent="InfoRow/InfoStack/IdentityPlate"]
+custom_minimum_size = Vector2(180, 48)
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="InfoRow/InfoStack/IdentityPlate/IdentityStack"]
+custom_minimum_size = Vector2(180, 28)
+text = "PLAYER"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 17
+
+[node name="TeamLabel" type="Label" parent="InfoRow/InfoStack/IdentityPlate/IdentityStack"]
+custom_minimum_size = Vector2(180, 20)
+text = "EQUIPE"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+
+[node name="HPBar" type="ProgressBar" parent="InfoRow/InfoStack"]
+custom_minimum_size = Vector2(180, 12)
+max_value = 10.0
+value = 10.0
+show_percentage = false
+theme_override_styles/fill = SubResource("HPFill")
+theme_override_styles/background = SubResource("HPBackground")
+
+[node name="RightSpacer" type="Control" parent="InfoRow"]
+custom_minimum_size = Vector2(90, 1)
+size_flags_horizontal = 3
+
+[node name="SpriteFrame" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(360, 360)
+color = Color(0, 0, 0, 0)
+
+[node name="Shadow" type="TextureRect" parent="SpriteFrame"]
+offset_right = 360.0
+offset_bottom = 360.0
+position = Vector2(0, 306)
+scale = Vector2(1, 0.3)
+texture = ExtResource("2_idle")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 1
+flip_v = true
+modulate = Color(0, 0, 0, 0.3)
+
+[node name="Sprite" type="TextureRect" parent="SpriteFrame"]
+offset_right = 360.0
+offset_bottom = 360.0
+texture = ExtResource("2_idle")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 1

@@ -1,0 +1,71 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/question_panel.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/label_plate.tscn" id="2_plate"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="3_theme"]
+
+[node name="QuestionPanel" type="VBoxContainer"]
+theme = ExtResource("3_theme")
+offset_top = 23.0
+offset_right = 1152.0
+offset_bottom = 648.0
+size_flags_horizontal = 1
+theme_override_constants/separation = 8
+script = ExtResource("1_script")
+
+[node name="QuestionPlate" parent="." instance=ExtResource("2_plate")]
+custom_minimum_size = Vector2(600, 96)
+size_flags_horizontal = 8
+
+[node name="Label" parent="QuestionPlate" index="1"]
+text = "Enunciado da questão aparece aqui"
+
+[node name="Tags" type="HBoxContainer" parent="."]
+alignment = 1
+size_flags_horizontal = 8
+theme_override_constants/separation = 20
+
+[node name="DifficultyPlate" parent="Tags" instance=ExtResource("2_plate")]
+custom_minimum_size = Vector2(120, 28)
+
+[node name="Label" parent="Tags/DifficultyPlate" index="1"]
+text = "[ MÉDIA ]"
+
+[node name="CategoryPlate" parent="Tags" instance=ExtResource("2_plate")]
+custom_minimum_size = Vector2(120, 28)
+
+[node name="Label" parent="Tags/CategoryPlate" index="1"]
+text = "[ MAT ]"
+
+[node name="OptionsGrid" type="GridContainer" parent="."]
+columns = 1
+size_flags_horizontal = 8
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="Option1" parent="OptionsGrid" instance=ExtResource("2_plate")]
+custom_minimum_size = Vector2(496, 54)
+size_flags_horizontal = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+
+[node name="Label" parent="OptionsGrid/Option1" index="1"]
+text = "[1/Q] Alternativa um"
+
+[node name="Option2" parent="OptionsGrid" instance=ExtResource("2_plate")]
+custom_minimum_size = Vector2(496, 54)
+size_flags_horizontal = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+
+[node name="Label" parent="OptionsGrid/Option2" index="1"]
+text = "[2/W] Alternativa dois"
+
+[node name="Option3" parent="OptionsGrid" instance=ExtResource("2_plate")]
+custom_minimum_size = Vector2(496, 54)
+size_flags_horizontal = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+
+[node name="Label" parent="OptionsGrid/Option3" index="1"]
+text = "[3/E] Alternativa três"

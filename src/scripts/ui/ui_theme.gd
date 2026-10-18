@@ -1,3 +1,4 @@
+@tool
 class_name UITheme
 extends RefCounted
 ## Aplica a fonte do jogo. Necessário porque a raiz é um Node2D

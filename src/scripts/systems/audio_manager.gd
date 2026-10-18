@@ -8,8 +8,7 @@ var _sfx_volume_db: float = 0.0
 
 
 func _ready() -> void:
-	_bgm_player = AudioStreamPlayer.new()
-	add_child(_bgm_player)
+	_bgm_player = $BGMPlayer as AudioStreamPlayer
 
 
 # ==================== CONTROLE DE VOLUME ====================

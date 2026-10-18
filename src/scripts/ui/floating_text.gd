@@ -1,3 +1,4 @@
+@tool
 class_name FloatingText
 extends Label
 ## Texto fixo que pisca e some ("ACERTOU!" / "ERROU!").
@@ -6,10 +7,11 @@ const WIDTH = 240.0
 const HEIGHT = 40.0
 const BLINK_HALF_DURATION = 0.2
 const BLINK_CYCLES = 6
+const FLOATING_TEXT_SCENE = preload("res://scenes/ui/floating_text.tscn")
 
 
 static func spawn(parent: Node, origin: Vector2, message: String, color: Color) -> void:
-	var floating := FloatingText.new()
+	var floating := FLOATING_TEXT_SCENE.instantiate() as FloatingText
 	floating.text = message
 	floating.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	floating.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://smxtrvlm56xi"]
+
+[ext_resource type="Script" uid="uid://c6mubdq51e65b" path="res://scripts/ui/battle_hud.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/player_panel.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/question_panel.tscn" id="3_question"]
+[ext_resource type="PackedScene" path="res://scenes/ui/label_plate.tscn" id="4_controls"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="5_theme"]
+[ext_resource type="Texture2D" path="res://assets/background/cenario.png" id="6_background"]
+
+[node name="BattleHud" type="Control" unique_id=841811301]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+theme = ExtResource("5_theme")
+script = ExtResource("1_script")
+
+[node name="BattleBackground" type="TextureRect" parent="." unique_id=982161311]
+z_index = -100
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+texture = ExtResource("6_background")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Player1" parent="." unique_id=426706398 instance=ExtResource("2_player")]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 190.0
+
+[node name="Player2" parent="." unique_id=452166676 instance=ExtResource("2_player")]
+layout_mode = 0
+offset_left = 812.0
+offset_top = 190.0
+
+[node name="QuestionPanel" parent="." unique_id=742943763 instance=ExtResource("3_question")]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 21.455
+offset_right = 880.0
+offset_bottom = 339.455
+
+[node name="ControlsHint" parent="." unique_id=538892570 instance=ExtResource("4_controls")]
+z_index = 11
+custom_minimum_size = Vector2(1152, 30)
+layout_mode = 0
+offset_top = 610.0
+offset_right = 1152.0
+offset_bottom = 640.0

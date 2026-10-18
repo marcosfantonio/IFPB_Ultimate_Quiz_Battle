@@ -28,11 +28,14 @@ var _opening_phrase: Label
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	z_index = 900
-	_build_overlay()
-	_build_player_blocks()
-	_build_versus()
-	_build_fight()
-	_build_opening_phrase()
+	_overlay = $Overlay as ColorRect
+	_player_1_block = $Player1Block as VBoxContainer
+	_player_2_block = $Player2Block as VBoxContainer
+	_versus_label = $VersusLabel as Label
+	_fight_label = $FightLabel as Label
+	_opening_phrase = $OpeningPhrase as Label
+	$Player1Block/Representative.add_theme_color_override("font_color", GameConfig.PLAYERS[1]["color"])
+	$Player2Block/Representative.add_theme_color_override("font_color", GameConfig.PLAYERS[2]["color"])
 	UITheme.apply_font(self)
 
 
@@ -89,82 +92,8 @@ func play(player_1_name: String, player_1_team: String, player_2_name: String, p
 	finished.emit()
 
 
-func _build_overlay() -> void:
-	_overlay = ColorRect.new()
-	_overlay.size = GameConfig.SCREEN_SIZE
-	_overlay.color = Color(0, 0, 0, DARKEN_ALPHA)
-	add_child(_overlay)
-
-
-func _build_player_blocks() -> void:
-	_player_1_block = _create_player_block(Vector2(40, 260), 1)
-	_player_2_block = _create_player_block(Vector2(712, 260), 2)
-	add_child(_player_1_block)
-	add_child(_player_2_block)
-
-
-func _create_player_block(at: Vector2, player: int) -> VBoxContainer:
-	var block := VBoxContainer.new()
-	block.position = at
-	block.size = Vector2(400, 120)
-	block.add_theme_constant_override("separation", 12)
-	var name_label := Label.new()
-	name_label.name = "Representative"
-	name_label.custom_minimum_size = Vector2(400, 54)
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 36)
-	name_label.add_theme_color_override("font_color", GameConfig.PLAYERS[player]["color"])
-	block.add_child(name_label)
-	var team_label := Label.new()
-	team_label.name = "Team"
-	team_label.custom_minimum_size = Vector2(400, 38)
-	team_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	team_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	team_label.add_theme_font_size_override("font_size", 23)
-	team_label.add_theme_color_override("font_color", Color(1, 0.82, 0.1))
-	block.add_child(team_label)
-	return block
-
-
 func _set_player_block(block: VBoxContainer, representative: String, team: String) -> void:
 	var name_label := block.get_node("Representative") as Label
 	var team_label := block.get_node("Team") as Label
 	name_label.text = representative
 	team_label.text = team
-
-
-func _build_versus() -> void:
-	_versus_label = Label.new()
-	_versus_label.text = "VS"
-	_versus_label.position = Vector2(476, 285)
-	_versus_label.size = Vector2(200, 80)
-	_versus_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_versus_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_versus_label.add_theme_font_size_override("font_size", 58)
-	_versus_label.add_theme_color_override("font_color", Color.WHITE)
-	add_child(_versus_label)
-
-
-func _build_fight() -> void:
-	_fight_label = Label.new()
-	_fight_label.text = "FIGHT!"
-	_fight_label.position = Vector2(276, 260)
-	_fight_label.size = Vector2(600, 100)
-	_fight_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_fight_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_fight_label.add_theme_font_size_override("font_size", 64)
-	_fight_label.add_theme_color_override("font_color", Color(1, 0.82, 0.1))
-	add_child(_fight_label)
-
-
-func _build_opening_phrase() -> void:
-	_opening_phrase = Label.new()
-	_opening_phrase.text = "E na luta de hoje..."
-	_opening_phrase.position = Vector2(126, 270)
-	_opening_phrase.size = Vector2(900, 80)
-	_opening_phrase.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_opening_phrase.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_opening_phrase.add_theme_font_size_override("font_size", 34)
-	_opening_phrase.add_theme_color_override("font_color", Color(1, 0.82, 0.1))
-	add_child(_opening_phrase)

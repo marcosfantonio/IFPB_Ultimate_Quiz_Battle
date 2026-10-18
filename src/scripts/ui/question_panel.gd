@@ -1,3 +1,4 @@
+@tool
 class_name QuestionPanel
 extends VBoxContainer
 ## Área central superior: enunciado, tags de dificuldade/categoria e alternativas.
@@ -25,12 +26,31 @@ var _tags: HBoxContainer
 
 func _ready() -> void:
 	position = Vector2(0, 23)
-	size = GameConfig.SCREEN_SIZE
+	size = Vector2(GameConfig.SCREEN_SIZE.x, GameConfig.SCREEN_SIZE.y - position.y)
 	add_theme_constant_override("separation", 8)
-
-	_build_question_plate()
-	_build_tags()
-	_build_options()
+	_question_plate = $QuestionPlate as LabelPlate
+	_tags = $Tags as HBoxContainer
+	_difficulty_plate = $Tags/DifficultyPlate as LabelPlate
+	_category_plate = $Tags/CategoryPlate as LabelPlate
+	_options_grid = $OptionsGrid as GridContainer
+	for option_node in _options_grid.get_children():
+		var plate := option_node as LabelPlate
+		plate.add_theme_constant_override("margin_left", int(OPTION_SIDE_MARGIN))
+		plate.add_theme_constant_override("margin_right", int(OPTION_SIDE_MARGIN))
+		plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		plate.label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		plate.label.add_theme_font_size_override("font_size", OPTION_FONT_SIZE)
+		plate.custom_minimum_size = Vector2(OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0, OPTION_HEIGHT)
+		plate.background.custom_minimum_size = plate.custom_minimum_size
+		plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		_option_plates.append(plate)
+	_question_plate.custom_minimum_size = Vector2(PANEL_WIDTH, QUESTION_HEIGHT)
+	_question_plate.background.custom_minimum_size = _question_plate.custom_minimum_size
+	_question_plate.label.custom_minimum_size = _question_plate.custom_minimum_size
+	_question_plate.label.add_theme_font_size_override("font_size", QUESTION_FONT_SIZE)
+	_question_plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_difficulty_plate.label.add_theme_font_size_override("font_size", 16)
+	_category_plate.label.add_theme_font_size_override("font_size", 16)
 	_center_horizontally()
 	UITheme.apply_font(self)
 
@@ -75,41 +95,6 @@ func highlight_answer(correct_index: int, chosen_index: int) -> void:
 func reset_highlights() -> void:
 	for plate in _option_plates:
 		plate.label.modulate = OPTION_NORMAL
-
-
-func _build_question_plate() -> void:
-	_question_plate = LabelPlate.create(Vector2(PANEL_WIDTH, QUESTION_HEIGHT), QUESTION_FONT_SIZE, Color.WHITE, Vector2(PANEL_WIDTH, QUESTION_HEIGHT))
-	_question_plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_question_plate.label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(_question_plate)
-
-
-func _build_tags() -> void:
-	_tags = HBoxContainer.new()
-	_tags.alignment = BoxContainer.ALIGNMENT_CENTER
-	_tags.add_theme_constant_override("separation", 20)
-
-	_difficulty_plate = LabelPlate.create(Vector2(120, TAG_HEIGHT), 16)
-	_category_plate = LabelPlate.create(Vector2(120, TAG_HEIGHT), 16)
-	_tags.add_child(_difficulty_plate)
-	_tags.add_child(_category_plate)
-	add_child(_tags)
-
-
-func _build_options() -> void:
-	_options_grid = GridContainer.new()
-	_options_grid.columns = 1
-	_options_grid.add_theme_constant_override("h_separation", GRID_GAP)
-	_options_grid.add_theme_constant_override("v_separation", GRID_GAP)
-	for _i in GameConfig.OPTIONS_PER_QUESTION:
-		var plate_width := OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0
-		var plate := LabelPlate.create(Vector2(plate_width, OPTION_HEIGHT), OPTION_FONT_SIZE, Color(0.85, 0.85, 0.85), Vector2.ZERO, int(OPTION_SIDE_MARGIN))
-		plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		plate.label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		_option_plates.append(plate)
-		_options_grid.add_child(plate)
-	add_child(_options_grid)
 
 
 func _resize_option_plate(plate: LabelPlate) -> void:

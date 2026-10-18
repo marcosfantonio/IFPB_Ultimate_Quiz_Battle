@@ -26,16 +26,15 @@ var _battle_setup_screen: BattleSetupScreen
 var _battle_intro_screen: BattleIntroScreen
 var _battle_results_screen: BattleResultsScreen
 var _menu_transitioning: bool = false
-var _background: TextureRect
+var _ui_layer: CanvasLayer
 var _screen_transition_overlay: ColorRect
 
 const CREATOR_TRANSITION_TIME = 1.5
+const START_SCREEN_SCENE = preload("res://scenes/ui/start_screen.tscn")
 
 
 func _ready() -> void:
 	z_index = 10
-	_background = get_node("Background") as TextureRect
-	_set_menu_background()
 	_repository.load_from_file(GameConfig.QUESTIONS_PATH)
 
 	_create_systems()
@@ -48,73 +47,39 @@ func _ready() -> void:
 # ==================== SETUP ====================
 
 func _create_systems() -> void:
-	_audio = AudioManager.new()
-	add_child(_audio)
+	_ui_layer = $UI as CanvasLayer
+	_audio = $AudioManager as AudioManager
 
-	_round = RoundController.new()
+	_round = $RoundController as RoundController
 	_round.setup(_repository)
-	add_child(_round)
 
-	var input_router := InputRouter.new()
+	var input_router := $InputRouter as InputRouter
 	input_router.start_requested.connect(_on_start_requested)
 	input_router.menu_move_requested.connect(_on_menu_move_requested)
 	input_router.debug_win_requested.connect(_on_debug_win_requested)
 	input_router.answer_requested.connect(_on_answer_requested)
-	add_child(input_router)
+	var idle_animator_1 := $IdleAnimator1 as IdleAnimator
+	idle_animator_1.setup(1)
+	idle_animator_1.pose_changed.connect(_on_pose_changed)
+	var idle_animator_2 := $IdleAnimator2 as IdleAnimator
+	idle_animator_2.setup(2)
+	idle_animator_2.pose_changed.connect(_on_pose_changed)
 
-	for player in GameConfig.PLAYERS:
-		var idle_animator := IdleAnimator.new()
-		idle_animator.setup(player)
-		idle_animator.pose_changed.connect(_on_pose_changed)
-		add_child(idle_animator)
-
-	# Primeiro filho: desenha atrás da UI, como no jogo original.
-	_projectile = Projectile.new()
+	_projectile = $UI/Projectile as Projectile
 	_projectile.z_index = 20
-	add_child(_projectile)
-	move_child(_projectile, 0)
 
 
 func _create_ui() -> void:
-	_hud = BattleHud.new()
-	_hud.visible = false  # só aparece depois do Enter
-	add_child(_hud)
-
-	_game_over_panel = GameOverPanel.new()
-	add_child(_game_over_panel)
-
-	_start_screen = StartScreen.new()
-	add_child(_start_screen)
-
-	_options_screen = OptionsScreen.new()
-	_options_screen.visible = false  # só aparece quando clicar em opções
+	_hud = $UI/BattleHud as BattleHud
+	_game_over_panel = $UI/GameOverPanel as GameOverPanel
+	_start_screen = $UI/StartScreen as StartScreen
+	_options_screen = $UI/OptionsScreen as OptionsScreen
 	_options_screen.audio_manager = _audio
-	add_child(_options_screen)
-
-	_question_creator_screen = QuestionCreatorScreen.new()
-	_question_creator_screen.visible = false
-	add_child(_question_creator_screen)
-
-	_battle_setup_screen = BattleSetupScreen.new()
-	_battle_setup_screen.visible = false
-	add_child(_battle_setup_screen)
-
-	_battle_intro_screen = BattleIntroScreen.new()
-	_battle_intro_screen.visible = false
-	add_child(_battle_intro_screen)
-
-	_battle_results_screen = BattleResultsScreen.new()
-	_battle_results_screen.visible = false
-	add_child(_battle_results_screen)
-
-	_screen_transition_overlay = ColorRect.new()
-	_screen_transition_overlay.position = Vector2.ZERO
-	_screen_transition_overlay.size = GameConfig.SCREEN_SIZE
-	_screen_transition_overlay.color = Color(0, 0, 0, 0)
-	_screen_transition_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	_screen_transition_overlay.z_index = 2000
-	_screen_transition_overlay.visible = false
-	add_child(_screen_transition_overlay)
+	_question_creator_screen = $UI/QuestionCreatorScreen as QuestionCreatorScreen
+	_battle_setup_screen = $UI/BattleSetupScreen as BattleSetupScreen
+	_battle_intro_screen = $UI/BattleIntroScreen as BattleIntroScreen
+	_battle_results_screen = $UI/BattleResultsScreen as BattleResultsScreen
+	_screen_transition_overlay = $UI/ScreenTransition as ColorRect
 
 
 func _connect_signals() -> void:
@@ -166,7 +131,7 @@ func _on_debug_win_requested() -> void:
 	var correct_index: int = _round.current_question.correct_index
 	_hud.question_panel.highlight_answer(correct_index, correct_index)
 	_audio.play_sfx(GameAssets.Sfx.CORRECT)
-	FloatingText.spawn(self, _hud.get_panel(1).get_floating_text_origin(), "ACERTOU!", Color(0.2, 1, 0.3))
+	FloatingText.spawn(_ui_layer, _hud.get_panel(1).get_floating_text_origin(), "ACERTOU!", Color(0.2, 1, 0.3))
 	_debug_lethal_pending = true
 	_launch_projectile(1)
 
@@ -182,7 +147,6 @@ func _on_new_battle_requested() -> void:
 func _on_battle_setup_started(player_1_name: String, player_1_team: String, player_2_name: String, player_2_team: String) -> void:
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_audio.play_battle_intro_bgm()
-	_background.texture = GameAssets.TEX_BATTLE_BACKGROUND
 	for player in GameConfig.PLAYERS:
 		_correct_counts[player] = 0
 		_error_counts[player] = 0
@@ -313,12 +277,12 @@ func _on_answer_resolved(player: int, option_index: int, correct: bool) -> void:
 	if correct:
 		_correct_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.CORRECT)
-		FloatingText.spawn(self, origin, "ACERTOU!", Color(0.2, 1, 0.3))
+		FloatingText.spawn(_ui_layer, origin, "ACERTOU!", Color(0.2, 1, 0.3))
 		_launch_projectile(player)
 	else:
 		_error_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.WRONG)
-		FloatingText.spawn(self, origin, "ERROU!", Color(1, 0.2, 0.2))
+		FloatingText.spawn(_ui_layer, origin, "ERROU!", Color(1, 0.2, 0.2))
 
 
 # ==================== COMBATE ====================
@@ -383,10 +347,9 @@ func _on_battle_results_finished() -> void:
 	_game_over_panel.visible = false
 	_match.reset()
 	_repository.reset_history()
-	_set_menu_background()
-	_start_screen = StartScreen.new()
+	_start_screen = START_SCREEN_SCENE.instantiate() as StartScreen
 	_start_screen.modulate.a = 0.0
-	add_child(_start_screen)
+	_ui_layer.add_child(_start_screen)
 	_connect_start_screen_signals()
 	for player in GameConfig.PLAYERS:
 		_hud.get_panel(player).finish_dizzy_animation()
@@ -396,8 +359,3 @@ func _on_battle_results_finished() -> void:
 	_battle_results_screen.fade_to_menu(1.0)
 	await menu_fade.finished
 	_phase = GamePhase.State.START_SCREEN
-
-
-func _set_menu_background() -> void:
-	if _background != null:
-		_background.texture = GameAssets.TEX_MENU_BACKGROUND

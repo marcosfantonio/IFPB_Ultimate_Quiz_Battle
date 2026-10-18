@@ -1,0 +1,99 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/battle_intro_screen.gd" id="1_script"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="2_theme"]
+
+[node name="BattleIntroScreen" type="Control"]
+z_index = 900
+theme = ExtResource("2_theme")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Overlay" type="ColorRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0, 0, 0, 0.9)
+
+[node name="Player1Block" type="VBoxContainer" parent="."]
+visible = false
+offset_left = 40.0
+offset_top = 260.0
+offset_right = 440.0
+offset_bottom = 380.0
+theme_override_constants/separation = 12
+
+[node name="Representative" type="Label" parent="Player1Block"]
+custom_minimum_size = Vector2(400, 54)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 36
+
+[node name="Team" type="Label" parent="Player1Block"]
+custom_minimum_size = Vector2(400, 38)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+
+[node name="Player2Block" type="VBoxContainer" parent="."]
+visible = false
+offset_left = 712.0
+offset_top = 260.0
+offset_right = 1112.0
+offset_bottom = 380.0
+theme_override_constants/separation = 12
+
+[node name="Representative" type="Label" parent="Player2Block"]
+custom_minimum_size = Vector2(400, 54)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 36
+
+[node name="Team" type="Label" parent="Player2Block"]
+custom_minimum_size = Vector2(400, 38)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+
+[node name="VersusLabel" type="Label" parent="."]
+visible = false
+offset_left = 476.0
+offset_top = 285.0
+offset_right = 676.0
+offset_bottom = 365.0
+text = "VS"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 58
+
+[node name="FightLabel" type="Label" parent="."]
+visible = false
+offset_left = 276.0
+offset_top = 260.0
+offset_right = 876.0
+offset_bottom = 360.0
+text = "FIGHT!"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 64
+
+[node name="OpeningPhrase" type="Label" parent="."]
+offset_left = 126.0
+offset_top = 270.0
+offset_right = 1026.0
+offset_bottom = 350.0
+text = "E na luta de hoje..."
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 34

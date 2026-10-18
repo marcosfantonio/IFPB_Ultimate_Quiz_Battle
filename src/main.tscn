@@ -1,15 +1,69 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bxk2pu60ucehn"]
 
-[ext_resource type="Script" path="res://scripts/battle.gd" id="1_battle"]
-[ext_resource type="Texture2D" uid="uid://cml1tyqffp8yg" path="res://assets/background/cenario.png" id="2_cenario"]
+[ext_resource type="Script" uid="uid://bo6xxx2u5l2uk" path="res://scripts/battle.gd" id="1_battle"]
+[ext_resource type="PackedScene" path="res://scenes/systems/audio_manager.tscn" id="3_audio"]
+[ext_resource type="PackedScene" path="res://scenes/systems/round_controller.tscn" id="4_round"]
+[ext_resource type="PackedScene" path="res://scenes/systems/input_router.tscn" id="5_input"]
+[ext_resource type="PackedScene" path="res://scenes/systems/idle_animator.tscn" id="6_idle"]
+[ext_resource type="PackedScene" path="res://scenes/systems/projectile.tscn" id="7_projectile"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_hud.tscn" id="8_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_over_panel.tscn" id="9_game_over"]
+[ext_resource type="PackedScene" path="res://scenes/ui/start_screen.tscn" id="10_start"]
+[ext_resource type="PackedScene" path="res://scenes/ui/options_screen.tscn" id="11_options"]
+[ext_resource type="PackedScene" path="res://scenes/ui/question_creator_screen.tscn" id="12_creator"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_setup_screen.tscn" id="13_setup"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_intro_screen.tscn" id="14_intro"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_results_screen.tscn" id="15_results"]
+[ext_resource type="PackedScene" path="res://scenes/ui/screen_transition.tscn" id="16_transition"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1500224833]
+z_index = 10
 script = ExtResource("1_battle")
 
-[node name="Background" type="TextureRect" parent="."]
-offset_right = 1152.0
-offset_bottom = 648.0
-texture = ExtResource("2_cenario")
-expand_mode = 1
-stretch_mode = 0
-z_index = -100
+[node name="UI" type="CanvasLayer" parent="." unique_id=1416392246]
+layer = 1
+
+[node name="AudioManager" parent="." unique_id=2038499114 instance=ExtResource("3_audio")]
+
+[node name="RoundController" parent="." unique_id=1989010896 instance=ExtResource("4_round")]
+
+[node name="InputRouter" parent="." unique_id=42838839 instance=ExtResource("5_input")]
+
+[node name="IdleAnimator1" parent="." unique_id=782869964 instance=ExtResource("6_idle")]
+
+[node name="IdleAnimator2" parent="." unique_id=1157499893 instance=ExtResource("6_idle")]
+
+[node name="Projectile" parent="UI" unique_id=1423160280 instance=ExtResource("7_projectile")]
+
+[node name="BattleHud" parent="UI" unique_id=801528882 instance=ExtResource("8_hud")]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+
+[node name="GameOverPanel" parent="UI" unique_id=1525608370 instance=ExtResource("9_game_over")]
+visible = false
+
+[node name="StartScreen" parent="UI" unique_id=1148347605 instance=ExtResource("10_start")]
+layout_mode = 3
+
+[node name="OptionsScreen" parent="UI" unique_id=1506007230 instance=ExtResource("11_options")]
+visible = false
+layout_mode = 3
+
+[node name="QuestionCreatorScreen" parent="UI" unique_id=224210281 instance=ExtResource("12_creator")]
+visible = false
+layout_mode = 3
+
+[node name="BattleSetupScreen" parent="UI" unique_id=1986658896 instance=ExtResource("13_setup")]
+visible = false
+layout_mode = 3
+
+[node name="BattleIntroScreen" parent="UI" unique_id=1510158481 instance=ExtResource("14_intro")]
+visible = false
+layout_mode = 3
+
+[node name="BattleResultsScreen" parent="UI" unique_id=382688333 instance=ExtResource("15_results")]
+visible = false
+layout_mode = 3
+
+[node name="ScreenTransition" parent="UI" unique_id=263020295 instance=ExtResource("16_transition")]

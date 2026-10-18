@@ -1,3 +1,4 @@
+@tool
 class_name QuestionStyle
 extends RefCounted
 ## Textos e cores das tags de dificuldade e categoria.

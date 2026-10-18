@@ -1,0 +1,505 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/question_creator_screen.gd" id="1_script"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="3_theme"]
+[ext_resource type="Texture2D" path="res://assets/background/menu.png" id="4_background"]
+
+[sub_resource type="StyleBoxFlat" id="DarkPanel"]
+bg_color = Color(0.025, 0.055, 0.075, 0.97)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.2, 0.85, 0.65, 1)
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="HomePanel"]
+bg_color = Color(0.025, 0.055, 0.075, 0.97)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.2, 0.85, 0.65, 1)
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="BankNamePlate"]
+bg_color = Color(0.025, 0.055, 0.075, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.85, 0.65, 1)
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="InputNormal"]
+bg_color = Color(0.04, 0.09, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.4, 0.43, 1)
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="InputFocus"]
+bg_color = Color(0.04, 0.09, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.82, 0.1, 1)
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="GreenButton"]
+bg_color = Color(0.08, 0.5, 0.24, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 1, 0.45, 1)
+
+[sub_resource type="StyleBoxFlat" id="GreenButtonHover"]
+bg_color = Color(0.14, 0.66, 0.32, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65, 1, 0.65, 1)
+
+[sub_resource type="StyleBoxFlat" id="BlueButton"]
+bg_color = Color(0.1, 0.28, 0.48, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.75, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="NeutralButton"]
+bg_color = Color(0.22, 0.22, 0.27, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.75, 0.78, 0.84, 1)
+
+[node name="QuestionCreatorScreen" type="Control"]
+z_index = 600
+theme = ExtResource("3_theme")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1882456101]
+z_index = -10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_background")
+expand_mode = 1
+stretch_mode = 0
+texture_filter = 1
+
+[node name="BackgroundShade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.035, 0.055, 0.78)
+
+[node name="HomePage" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HomePanel" type="PanelContainer" parent="HomePage"]
+offset_left = 306.0
+offset_top = 125.0
+offset_right = 846.0
+offset_bottom = 515.0
+theme_override_styles/panel = SubResource("HomePanel")
+
+[node name="Content" type="VBoxContainer" parent="HomePage/HomePanel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="HomePage/HomePanel/Content"]
+layout_mode = 2
+text = "CRIADOR DE QUESTÕES"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 30
+
+[node name="Subtitle" type="Label" parent="HomePage/HomePanel/Content"]
+layout_mode = 2
+text = "MONTE OU EDITE SEU BANCO"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="CreateBankButton" type="Button" parent="HomePage/HomePanel/Content"]
+custom_minimum_size = Vector2(360, 54)
+layout_mode = 2
+text = "CRIAR BANCO"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("GreenButton")
+theme_override_styles/hover = SubResource("GreenButtonHover")
+theme_override_styles/pressed = SubResource("GreenButton")
+
+[node name="ImportBankButton" type="Button" parent="HomePage/HomePanel/Content"]
+custom_minimum_size = Vector2(360, 54)
+layout_mode = 2
+text = "IMPORTAR BANCO JSON"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("BlueButton")
+theme_override_styles/hover = SubResource("GreenButtonHover")
+theme_override_styles/pressed = SubResource("BlueButton")
+
+[node name="HomeBackButton" type="Button" parent="HomePage/HomePanel/Content"]
+custom_minimum_size = Vector2(200, 42)
+layout_mode = 2
+text = "VOLTAR"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("NeutralButton")
+theme_override_styles/hover = SubResource("BlueButton")
+theme_override_styles/pressed = SubResource("NeutralButton")
+
+[node name="EditorPage" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="Label" parent="EditorPage"]
+offset_left = 28.0
+offset_top = 14.0
+offset_right = 278.0
+offset_bottom = 46.0
+text = "EDITOR DE BANCO"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="BankNamePlate" type="PanelContainer" parent="EditorPage"]
+offset_left = 282.0
+offset_top = 12.0
+offset_right = 414.0
+offset_bottom = 48.0
+theme_override_styles/panel = SubResource("BankNamePlate")
+
+[node name="BankNameLabel" type="Label" parent="EditorPage/BankNamePlate"]
+layout_mode = 2
+text = "NOME DO BANCO"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="BankNameEdit" type="LineEdit" parent="EditorPage"]
+offset_left = 420.0
+offset_top = 14.0
+offset_right = 850.0
+offset_bottom = 50.0
+placeholder_text = "Ex.: Ciências do IFPB"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_placeholder_color = Color(0.65, 0.72, 0.76, 1)
+theme_override_colors/caret_color = Color(1, 0.82, 0.1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/focus = SubResource("InputFocus")
+
+[node name="ListPanel" type="PanelContainer" parent="EditorPage"]
+offset_left = 24.0
+offset_top = 90.0
+offset_right = 429.0
+offset_bottom = 558.0
+theme_override_styles/panel = SubResource("DarkPanel")
+
+[node name="ListContent" type="VBoxContainer" parent="EditorPage/ListPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ListTitle" type="Label" parent="EditorPage/ListPanel/ListContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "QUESTÕES NO BANCO"
+theme_override_colors/font_color = Color(0.3, 1, 0.67, 1)
+theme_override_font_sizes/font_size = 17
+
+[node name="QuestionScroll" type="ScrollContainer" parent="EditorPage/ListPanel/ListContent"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+
+[node name="QuestionList" type="VBoxContainer" parent="EditorPage/ListPanel/ListContent/QuestionScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="StatusLabel" type="Label" parent="EditorPage/ListPanel/ListContent"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Dê um nome ao banco e adicione as questões."
+autowrap_mode = 3
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="FormPanel" type="PanelContainer" parent="EditorPage"]
+offset_left = 453.0
+offset_top = 90.0
+offset_right = 1128.0
+offset_bottom = 558.0
+theme_override_styles/panel = SubResource("DarkPanel")
+
+[node name="Form" type="VBoxContainer" parent="EditorPage/FormPanel"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="FormTitle" type="Label" parent="EditorPage/FormPanel/Form"]
+custom_minimum_size = Vector2(0, 27)
+layout_mode = 2
+text = "DADOS DA QUESTÃO"
+theme_override_colors/font_color = Color(0.3, 1, 0.67, 1)
+theme_override_font_sizes/font_size = 17
+
+[node name="QuestionTitle" type="Label" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+text = "ENUNCIADO"
+theme_override_colors/font_color = Color(0.86, 0.89, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="QuestionEdit" type="TextEdit" parent="EditorPage/FormPanel/Form"]
+custom_minimum_size = Vector2(0, 66)
+layout_mode = 2
+placeholder_text = "Digite o enunciado da questão..."
+wrap_mode = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/caret_color = Color(1, 0.82, 0.1, 1)
+theme_override_colors/font_placeholder_color = Color(0.65, 0.72, 0.76, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/focus = SubResource("InputFocus")
+
+[node name="OptionsTitle" type="Label" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+text = "ALTERNATIVAS (3)"
+theme_override_colors/font_color = Color(0.86, 0.89, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="OptionRow1" type="HBoxContainer" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Tag" type="Label" parent="EditorPage/FormPanel/Form/OptionRow1"]
+custom_minimum_size = Vector2(28, 36)
+layout_mode = 2
+text = "1."
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="OptionEdit" type="LineEdit" parent="EditorPage/FormPanel/Form/OptionRow1"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Texto da alternativa 1"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_placeholder_color = Color(0.65, 0.72, 0.76, 1)
+theme_override_colors/caret_color = Color(1, 0.82, 0.1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/focus = SubResource("InputFocus")
+
+[node name="OptionRow2" type="HBoxContainer" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Tag" type="Label" parent="EditorPage/FormPanel/Form/OptionRow2"]
+custom_minimum_size = Vector2(28, 36)
+layout_mode = 2
+text = "2."
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="OptionEdit" type="LineEdit" parent="EditorPage/FormPanel/Form/OptionRow2"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Texto da alternativa 2"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_placeholder_color = Color(0.65, 0.72, 0.76, 1)
+theme_override_colors/caret_color = Color(1, 0.82, 0.1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/focus = SubResource("InputFocus")
+
+[node name="OptionRow3" type="HBoxContainer" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Tag" type="Label" parent="EditorPage/FormPanel/Form/OptionRow3"]
+custom_minimum_size = Vector2(28, 36)
+layout_mode = 2
+text = "3."
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="OptionEdit" type="LineEdit" parent="EditorPage/FormPanel/Form/OptionRow3"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Texto da alternativa 3"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_placeholder_color = Color(0.65, 0.72, 0.76, 1)
+theme_override_colors/caret_color = Color(1, 0.82, 0.1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/focus = SubResource("InputFocus")
+
+[node name="CorrectRow" type="HBoxContainer" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CorrectTitle" type="Label" parent="EditorPage/FormPanel/Form/CorrectRow"]
+layout_mode = 2
+text = "RESPOSTA CORRETA"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="CorrectOption" type="OptionButton" parent="EditorPage/FormPanel/Form/CorrectRow"]
+custom_minimum_size = Vector2(190, 34)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/hover = SubResource("InputNormal")
+theme_override_styles/pressed = SubResource("InputFocus")
+
+[node name="MetadataRow" type="HBoxContainer" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CategoryTitle" type="Label" parent="EditorPage/FormPanel/Form/MetadataRow"]
+layout_mode = 2
+text = "CATEGORIA"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="CategoryOption" type="OptionButton" parent="EditorPage/FormPanel/Form/MetadataRow"]
+custom_minimum_size = Vector2(150, 34)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/hover = SubResource("InputNormal")
+theme_override_styles/pressed = SubResource("InputFocus")
+
+[node name="CustomCategoryEdit" type="LineEdit" parent="EditorPage/FormPanel/Form/MetadataRow"]
+visible = false
+custom_minimum_size = Vector2(135, 34)
+layout_mode = 2
+placeholder_text = "Nome da categoria"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_placeholder_color = Color(0.65, 0.72, 0.76, 1)
+theme_override_colors/caret_color = Color(1, 0.82, 0.1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/focus = SubResource("InputFocus")
+
+[node name="DifficultyTitle" type="Label" parent="EditorPage/FormPanel/Form/MetadataRow"]
+layout_mode = 2
+text = "DIFICULDADE"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="DifficultyOption" type="OptionButton" parent="EditorPage/FormPanel/Form/MetadataRow"]
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("InputNormal")
+theme_override_styles/hover = SubResource("InputNormal")
+theme_override_styles/pressed = SubResource("InputFocus")
+
+[node name="FormButtons" type="HBoxContainer" parent="EditorPage/FormPanel/Form"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 10
+
+[node name="AddQuestionButton" type="Button" parent="EditorPage/FormPanel/Form/FormButtons"]
+custom_minimum_size = Vector2(190, 42)
+layout_mode = 2
+text = "ADICIONAR"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("GreenButton")
+theme_override_styles/hover = SubResource("GreenButtonHover")
+theme_override_styles/pressed = SubResource("GreenButton")
+
+[node name="CancelEditButton" type="Button" parent="EditorPage/FormPanel/Form/FormButtons"]
+custom_minimum_size = Vector2(160, 42)
+layout_mode = 2
+text = "CANCELAR EDIÇÃO"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("NeutralButton")
+theme_override_styles/hover = SubResource("BlueButton")
+theme_override_styles/pressed = SubResource("NeutralButton")
+
+[node name="BackButton" type="Button" parent="EditorPage"]
+offset_left = 24.0
+offset_top = 598.0
+offset_right = 154.0
+offset_bottom = 636.0
+custom_minimum_size = Vector2(130, 38)
+text = "VOLTAR"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("NeutralButton")
+theme_override_styles/hover = SubResource("BlueButton")
+theme_override_styles/pressed = SubResource("NeutralButton")
+
+[node name="SaveExportButton" type="Button" parent="EditorPage"]
+offset_left = 650.0
+offset_top = 598.0
+offset_right = 900.0
+offset_bottom = 636.0
+custom_minimum_size = Vector2(250, 38)
+text = "SALVAR / EXPORTAR JSON"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("BlueButton")
+theme_override_styles/hover = SubResource("GreenButtonHover")
+theme_override_styles/pressed = SubResource("BlueButton")
+
+[node name="UseBankButton" type="Button" parent="EditorPage"]
+offset_left = 916.0
+offset_top = 598.0
+offset_right = 1128.0
+offset_bottom = 636.0
+custom_minimum_size = Vector2(212, 38)
+text = "USAR ESTE BANCO"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("GreenButton")
+theme_override_styles/hover = SubResource("GreenButtonHover")
+theme_override_styles/pressed = SubResource("GreenButton")
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Banco de questões JSON"

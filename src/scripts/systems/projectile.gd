@@ -14,13 +14,11 @@ var _shadow_y: float = 0.0
 var _trail: Array[Vector2] = []
 var _time: float = 0.0
 var _duration: float = 0.001
-var _ball_sprite: Sprite2D
-var _ball_shadow: Sprite2D
+@onready var _ball_sprite: Sprite2D = $BallSprite
+@onready var _ball_shadow: Sprite2D = $BallShadow
 
 
 func _ready() -> void:
-	_ball_shadow = Sprite2D.new()
-	_ball_shadow.texture = GameAssets.TEX_PAPER_BALL
 	_ball_shadow.flip_v = true
 	_ball_shadow.modulate = Color(0.0, 0.0, 0.0, GameConfig.PROJECTILE_SHADOW_OPACITY)
 	_ball_shadow.scale = Vector2(
@@ -28,13 +26,8 @@ func _ready() -> void:
 		GameConfig.PROJECTILE_SCALE * GameConfig.PROJECTILE_SHADOW_HEIGHT_RATIO
 	)
 	_ball_shadow.visible = false
-	add_child(_ball_shadow)
-
-	_ball_sprite = Sprite2D.new()
-	_ball_sprite.texture = GameAssets.TEX_PAPER_BALL
 	_ball_sprite.scale = Vector2.ONE * GameConfig.PROJECTILE_SCALE
 	_ball_sprite.visible = false
-	add_child(_ball_sprite)
 
 
 func launch(attacker: int, from: Vector2, to: Vector2, shadow_y: float) -> void:

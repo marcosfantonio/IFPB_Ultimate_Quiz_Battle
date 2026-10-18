@@ -1,7 +1,21 @@
 # Arquitetura do jogo
 
-`battle.gd` é só o **orquestrador**: cria os módulos, liga os sinais e controla a fase
+`main.tscn` é a cena raiz e compõe o cenário, os sistemas persistentes e as telas principais.
+`battle.gd` é o **orquestrador**: obtém os nós da cena, liga os sinais e controla a fase
 (`GamePhase.State`). Cada módulo faz uma coisa.
+
+O cenário fica no canvas do mundo; as telas, HUD e projétil ficam sob uma `CanvasLayer` para
+compartilhar o mesmo espaço de coordenadas e ordem de desenho. A viewport 1152×648 mantém a
+proporção 16:9 com letterbox em janelas de outra proporção, preservando os layouts fixos.
+
+Os layouts estáticos vivem em `src/scenes/` e podem ser editados no Godot. A interface de jogo
+é composta por cenas reutilizáveis (`BattleHud`, `PlayerPanel`, `QuestionPanel` e `LabelPlate`).
+Conteúdo que varia em quantidade — como alternativas, questões e campos do banco — continua sendo
+instanciado por código a partir desses componentes.
+
+`main.tscn` mostra o menu inicial e o fundo compartilhado. Para visualizar telas que começam
+ocultas no fluxo do jogo, abra sua cena em `src/scenes/ui/`. Os scripts de preview do HUD usam
+`@tool` para aplicar no editor as mesmas posições e configurações usadas durante a partida.
 
 Regras de dependência:
 - `core/` e `data/` não dependem de `systems/` nem de `ui/`.
@@ -11,8 +25,13 @@ Regras de dependência:
   reutilizam `LabelPlate` e `UITheme`.
 
 ```
+src/scenes/
+├── systems/                   # cenas-raiz dos nós de áudio, rodada, entrada, idle e projétil
+├── materials/                 # materiais reutilizáveis, como o brilho da logo
+└── ui/                        # HUD, painéis, telas e componentes visuais reutilizáveis
+
 src/scripts/
-├── battle.gd                  # orquestrador (cena principal)
+├── battle.gd                  # orquestrador de main.tscn
 ├── core/
 │   ├── game_config.gd         # constantes: HP, dano, projétil, tempos, teclas, cores dos jogadores
 │   ├── game_assets.gd         # preloads de fonte, texturas e sons

@@ -1,3 +1,4 @@
+@tool
 class_name GameConfig
 extends RefCounted
 ## Constantes de balanceamento, layout e perfil dos jogadores.

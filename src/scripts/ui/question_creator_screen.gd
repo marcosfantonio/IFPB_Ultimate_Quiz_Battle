@@ -33,10 +33,56 @@ var _dialog_purpose: String = ""
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	z_index = 600
-	_build_background()
-	_build_home_page()
-	_build_editor_page()
-	_build_file_dialog()
+	_background_shade = $BackgroundShade as ColorRect
+	_home_page = $HomePage as Control
+	_editor_page = $EditorPage as Control
+	_bank_name_edit = $EditorPage/BankNameEdit as LineEdit
+	_question_edit = $EditorPage/FormPanel/Form/QuestionEdit as TextEdit
+	_option_edits = [
+		$EditorPage/FormPanel/Form/OptionRow1/OptionEdit as LineEdit,
+		$EditorPage/FormPanel/Form/OptionRow2/OptionEdit as LineEdit,
+		$EditorPage/FormPanel/Form/OptionRow3/OptionEdit as LineEdit,
+	]
+	_correct_option = $EditorPage/FormPanel/Form/CorrectRow/CorrectOption as OptionButton
+	_category_option = $EditorPage/FormPanel/Form/MetadataRow/CategoryOption as OptionButton
+	_custom_category_edit = $EditorPage/FormPanel/Form/MetadataRow/CustomCategoryEdit as LineEdit
+	_difficulty_option = $EditorPage/FormPanel/Form/MetadataRow/DifficultyOption as OptionButton
+	_question_list = $EditorPage/ListPanel/ListContent/QuestionScroll/QuestionList as VBoxContainer
+	_status_label = $EditorPage/ListPanel/ListContent/StatusLabel as Label
+	_add_question_button = $EditorPage/FormPanel/Form/FormButtons/AddQuestionButton as Button
+	_file_dialog = $FileDialog as FileDialog
+
+	_correct_option.clear()
+	for index in OPTIONS_REQUIRED:
+		_correct_option.add_item("Alternativa %d" % (index + 1))
+	_style_option_button(_correct_option)
+	_category_option.clear()
+	for category in EDITOR_CATEGORIES:
+		_category_option.add_item(category)
+	_category_option.add_item("Outra...")
+	_style_option_button(_category_option)
+	_difficulty_option.clear()
+	_difficulty_option.add_item("Fácil")
+	_difficulty_option.set_item_metadata(0, "easy")
+	_difficulty_option.add_item("Média")
+	_difficulty_option.set_item_metadata(1, "medium")
+	_difficulty_option.add_item("Difícil")
+	_difficulty_option.set_item_metadata(2, "hard")
+	_style_option_button(_difficulty_option)
+
+	$HomePage/HomePanel/Content/CreateBankButton.pressed.connect(_start_new_bank)
+	$HomePage/HomePanel/Content/ImportBankButton.pressed.connect(_open_import_dialog)
+	$HomePage/HomePanel/Content/HomeBackButton.pressed.connect(func() -> void: back_requested.emit())
+	$EditorPage/BackButton.pressed.connect(_show_home)
+	$EditorPage/SaveExportButton.pressed.connect(_open_export_dialog)
+	$EditorPage/UseBankButton.pressed.connect(_use_bank)
+	$EditorPage/FormPanel/Form/FormButtons/CancelEditButton.pressed.connect(_clear_question_form)
+	_add_question_button.pressed.connect(_on_add_or_update_question)
+	_category_option.item_selected.connect(_on_category_selected)
+	_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_file_dialog.use_native_dialog = true
+	_file_dialog.filters = PackedStringArray(["*.json ; Arquivos JSON"])
+	_file_dialog.file_selected.connect(_on_file_selected)
 	UITheme.apply_font(self)
 	_show_home()
 
@@ -50,240 +96,6 @@ func _process(_delta: float) -> void:
 		back_requested.emit()
 
 
-func _build_background() -> void:
-	var background := TextureRect.new()
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	background.stretch_mode = TextureRect.STRETCH_SCALE
-	background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	background.texture = GameAssets.TEX_CREATOR_BACKGROUND
-	add_child(background)
-	_background_shade = ColorRect.new()
-	_background_shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_background_shade.color = Color(0.015, 0.035, 0.055, 0.78)
-	add_child(_background_shade)
-
-
-func _build_home_page() -> void:
-	_home_page = Control.new()
-	_home_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(_home_page)
-
-	var panel := _create_panel(Vector2(540, 390), Vector2(306, 125), Color(0.2, 0.85, 0.65))
-	_home_page.add_child(panel)
-	var content := VBoxContainer.new()
-	content.alignment = BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation", 18)
-	panel.add_child(content)
-
-	var title := _create_label("CRIADOR DE QUESTÕES", 30, Color(1, 0.82, 0.1))
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(title)
-	var subtitle := _create_label("MONTE OU EDITE SEU BANCO", 16, Color(0.72, 0.84, 0.86))
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(subtitle)
-
-	var create_button := _create_action_button("CRIAR BANCO", Color(0.12, 0.48, 0.36), Color(0.3, 1.0, 0.67))
-	create_button.custom_minimum_size = Vector2(360, 54)
-	create_button.pressed.connect(_start_new_bank)
-	content.add_child(create_button)
-
-	var import_button := _create_action_button("IMPORTAR BANCO JSON", Color(0.1, 0.28, 0.48), Color(0.4, 0.75, 1.0))
-	import_button.custom_minimum_size = Vector2(360, 54)
-	import_button.pressed.connect(_open_import_dialog)
-	content.add_child(import_button)
-
-	var back_button := _create_action_button("VOLTAR", Color(0.22, 0.22, 0.27), Color(0.75, 0.78, 0.84))
-	back_button.custom_minimum_size = Vector2(200, 42)
-	back_button.pressed.connect(func() -> void: back_requested.emit())
-	content.add_child(back_button)
-
-
-func _build_editor_page() -> void:
-	_editor_page = Control.new()
-	_editor_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(_editor_page)
-
-	var header := _create_label("EDITOR DE BANCO", 20, Color.WHITE)
-	header.position = Vector2(28, 14)
-	header.size = Vector2(250, 32)
-	header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_editor_page.add_child(header)
-
-	var bank_name_plate := PanelContainer.new()
-	bank_name_plate.position = Vector2(282, 12)
-	bank_name_plate.size = Vector2(132, 36)
-	bank_name_plate.custom_minimum_size = Vector2(132, 36)
-	var bank_name_style := StyleBoxFlat.new()
-	bank_name_style.bg_color = Color(0.025, 0.055, 0.075, 0.97)
-	bank_name_style.set_border_width_all(2)
-	bank_name_style.border_color = Color(0.2, 0.85, 0.65)
-	bank_name_style.set_content_margin_all(2.0)
-	bank_name_plate.add_theme_stylebox_override("panel", bank_name_style)
-	_editor_page.add_child(bank_name_plate)
-	var bank_name_label := _create_label("NOME DO BANCO", 14, Color.WHITE)
-	bank_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bank_name_label.custom_minimum_size = Vector2(0, 32)
-	bank_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	bank_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	bank_name_plate.add_child(bank_name_label)
-	_bank_name_edit = _create_line_edit("Ex.: Ciências do IFPB")
-	_bank_name_edit.position = Vector2(420, 14)
-	_bank_name_edit.size = Vector2(430, 36)
-	_editor_page.add_child(_bank_name_edit)
-
-	var list_panel := _create_panel(Vector2(405, 468), Vector2(24, 90), Color(0.2, 0.85, 0.65))
-	_editor_page.add_child(list_panel)
-	var list_content := VBoxContainer.new()
-	list_content.add_theme_constant_override("separation", 10)
-	list_panel.add_child(list_content)
-	var list_title := _create_label("QUESTÕES NO BANCO", 17, Color(0.3, 1.0, 0.67))
-	list_title.custom_minimum_size.y = 30
-	list_content.add_child(list_title)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list_content.add_child(scroll)
-	_question_list = VBoxContainer.new()
-	_question_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_question_list.add_theme_constant_override("separation", 6)
-	scroll.add_child(_question_list)
-	_status_label = _create_label("Dê um nome ao banco e adicione as questões.", 12, Color(0.72, 0.84, 0.86))
-	_status_label.custom_minimum_size.y = 42
-	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	list_content.add_child(_status_label)
-
-	var form_panel := _create_panel(Vector2(675, 468), Vector2(453, 90), Color(0.2, 0.85, 0.65))
-	_editor_page.add_child(form_panel)
-	var form := VBoxContainer.new()
-	form.add_theme_constant_override("separation", 7)
-	form_panel.add_child(form)
-	var form_title := _create_label("DADOS DA QUESTÃO", 17, Color(0.3, 1.0, 0.67))
-	form_title.custom_minimum_size.y = 27
-	form.add_child(form_title)
-	var question_title := _create_label("ENUNCIADO", 13, Color(0.86, 0.89, 0.92))
-	form.add_child(question_title)
-	_question_edit = TextEdit.new()
-	_question_edit.custom_minimum_size = Vector2(0, 66)
-	_question_edit.placeholder_text = "Digite o enunciado da questão..."
-	_question_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
-	_style_text_edit(_question_edit)
-	form.add_child(_question_edit)
-
-	var options_title := _create_label("ALTERNATIVAS (3)", 13, Color(0.86, 0.89, 0.92))
-	form.add_child(options_title)
-	for index in OPTIONS_REQUIRED:
-		var option_row := HBoxContainer.new()
-		option_row.add_theme_constant_override("separation", 8)
-		var option_tag := _create_label("%d." % (index + 1), 15, Color(1, 0.82, 0.1))
-		option_tag.custom_minimum_size = Vector2(28, 36)
-		option_tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		option_row.add_child(option_tag)
-		var option_edit := _create_line_edit("Texto da alternativa %d" % (index + 1))
-		option_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		option_edit.custom_minimum_size.y = 36
-		_option_edits.append(option_edit)
-		option_row.add_child(option_edit)
-		form.add_child(option_row)
-
-	var correct_row := HBoxContainer.new()
-	correct_row.add_theme_constant_override("separation", 10)
-	correct_row.add_child(_create_label("RESPOSTA CORRETA", 13, Color.WHITE))
-	_correct_option = OptionButton.new()
-	_correct_option.custom_minimum_size = Vector2(190, 34)
-	for index in OPTIONS_REQUIRED:
-		_correct_option.add_item("Alternativa %d" % (index + 1))
-	_style_option_button(_correct_option)
-	correct_row.add_child(_correct_option)
-	correct_row.add_spacer(false)
-	form.add_child(correct_row)
-
-	var metadata_row := HBoxContainer.new()
-	metadata_row.add_theme_constant_override("separation", 10)
-	metadata_row.add_child(_create_label("CATEGORIA", 13, Color.WHITE))
-	_category_option = OptionButton.new()
-	_category_option.custom_minimum_size = Vector2(150, 34)
-	for category in EDITOR_CATEGORIES:
-		_category_option.add_item(category)
-	_category_option.add_item("Outra...")
-	_style_option_button(_category_option)
-	_category_option.item_selected.connect(_on_category_selected)
-	metadata_row.add_child(_category_option)
-	_custom_category_edit = _create_line_edit("Nome da categoria")
-	_custom_category_edit.custom_minimum_size = Vector2(135, 34)
-	_custom_category_edit.visible = false
-	metadata_row.add_child(_custom_category_edit)
-	metadata_row.add_child(_create_label("DIFICULDADE", 13, Color.WHITE))
-	_difficulty_option = OptionButton.new()
-	_difficulty_option.custom_minimum_size = Vector2(120, 34)
-	_difficulty_option.add_item("Fácil")
-	_difficulty_option.set_item_metadata(0, "easy")
-	_difficulty_option.add_item("Média")
-	_difficulty_option.set_item_metadata(1, "medium")
-	_difficulty_option.add_item("Difícil")
-	_difficulty_option.set_item_metadata(2, "hard")
-	_style_option_button(_difficulty_option)
-	metadata_row.add_child(_difficulty_option)
-	form.add_child(metadata_row)
-
-	var form_buttons := HBoxContainer.new()
-	form_buttons.alignment = BoxContainer.ALIGNMENT_END
-	form_buttons.add_theme_constant_override("separation", 10)
-	_add_question_button = _create_action_button("ADICIONAR", Color(0.08, 0.5, 0.24), Color(0.3, 1.0, 0.45))
-	_add_question_button.custom_minimum_size = Vector2(190, 42)
-	_add_question_button.pressed.connect(_on_add_or_update_question)
-	form_buttons.add_child(_add_question_button)
-	var cancel_edit_button := _create_action_button("CANCELAR EDIÇÃO", Color(0.24, 0.24, 0.28), Color(0.8, 0.82, 0.86))
-	cancel_edit_button.custom_minimum_size = Vector2(160, 42)
-	cancel_edit_button.pressed.connect(_clear_question_form)
-	form_buttons.add_child(cancel_edit_button)
-	form.add_child(form_buttons)
-
-	var back_button := _create_action_button("VOLTAR", Color(0.22, 0.22, 0.27), Color(0.75, 0.78, 0.84))
-	back_button.position = Vector2(24, 598)
-	back_button.custom_minimum_size = Vector2(130, 38)
-	back_button.size = Vector2(130, 38)
-	back_button.pressed.connect(_show_home)
-	_editor_page.add_child(back_button)
-
-	var save_button := _create_icon_action_button("SALVAR / EXPORTAR JSON", "save", Color(0.12, 0.32, 0.48), Color(0.45, 0.8, 1.0))
-	save_button.position = Vector2(650, 598)
-	save_button.custom_minimum_size = Vector2(250, 38)
-	save_button.size = Vector2(250, 38)
-	save_button.pressed.connect(_open_export_dialog)
-	_editor_page.add_child(save_button)
-
-	var use_bank_button := _create_action_button("USAR ESTE BANCO", Color(0.08, 0.5, 0.24), Color(0.3, 1.0, 0.45))
-	use_bank_button.position = Vector2(916, 598)
-	use_bank_button.custom_minimum_size = Vector2(212, 38)
-	use_bank_button.size = Vector2(212, 38)
-	use_bank_button.pressed.connect(_use_bank)
-	_editor_page.add_child(use_bank_button)
-
-
-func _build_file_dialog() -> void:
-	_file_dialog = FileDialog.new()
-	_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	_file_dialog.use_native_dialog = true
-	_file_dialog.filters = PackedStringArray(["*.json ; Arquivos JSON"])
-	_file_dialog.file_selected.connect(_on_file_selected)
-	add_child(_file_dialog)
-
-
-func _create_panel(panel_size: Vector2, at: Vector2, border: Color) -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.position = at
-	panel.size = panel_size
-	panel.custom_minimum_size = panel_size
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.025, 0.055, 0.075, 0.97)
-	style.set_border_width_all(3)
-	style.border_color = border
-	style.set_content_margin_all(16.0)
-	panel.add_theme_stylebox_override("panel", style)
-	return panel
-
-
 func _create_label(text: String, font_size: int, color: Color) -> Label:
 	var label := Label.new()
 	label.text = text
@@ -291,29 +103,6 @@ func _create_label(text: String, font_size: int, color: Color) -> Label:
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
 	return label
-
-
-func _create_line_edit(placeholder: String) -> LineEdit:
-	var field := LineEdit.new()
-	field.placeholder_text = placeholder
-	field.add_theme_font_override("font", GameAssets.FONT)
-	field.add_theme_color_override("font_color", Color.WHITE)
-	field.add_theme_color_override("font_placeholder_color", Color(0.65, 0.72, 0.76))
-	field.add_theme_color_override("caret_color", Color(1, 0.82, 0.1))
-	var normal := _create_input_style(Color(0.04, 0.09, 0.12), Color(0.25, 0.4, 0.43))
-	var focused := _create_input_style(Color(0.04, 0.09, 0.12), Color(1, 0.82, 0.1))
-	field.add_theme_stylebox_override("normal", normal)
-	field.add_theme_stylebox_override("focus", focused)
-	return field
-
-
-func _style_text_edit(field: TextEdit) -> void:
-	field.add_theme_font_override("font", GameAssets.FONT)
-	field.add_theme_color_override("font_color", Color.WHITE)
-	field.add_theme_color_override("caret_color", Color(1, 0.82, 0.1))
-	field.add_theme_color_override("font_placeholder_color", Color(0.65, 0.72, 0.76))
-	field.add_theme_stylebox_override("normal", _create_input_style(Color(0.04, 0.09, 0.12), Color(0.25, 0.4, 0.43)))
-	field.add_theme_stylebox_override("focus", _create_input_style(Color(0.04, 0.09, 0.12), Color(1, 0.82, 0.1)))
 
 
 func _create_input_style(background: Color, border: Color) -> StyleBoxFlat:

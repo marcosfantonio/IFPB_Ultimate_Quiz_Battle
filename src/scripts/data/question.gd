@@ -1,3 +1,4 @@
+@tool
 class_name Question
 extends RefCounted
 ## Uma pergunta validada. Use Question.from_dict() para criar.
