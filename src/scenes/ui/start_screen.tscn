@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bmk32cynm0u78" path="res://assets/interface/opcoes.png" id="3_options"]
 [ext_resource type="Material" path="res://scenes/materials/logo_shine.tres" id="4_shine"]
 [ext_resource type="Theme" path="res://themes/game_theme.tres" id="5_theme"]
-[ext_resource type="Texture2D" path="res://assets/background/menu.png" id="6_background"]
+[ext_resource type="Texture2D" uid="uid://drjwu6lmtlcli" path="res://assets/background/menu.png" id="6_background"]
 
 [node name="StartScreen" type="Control" unique_id=1857423716]
 z_index = 500
@@ -20,15 +20,14 @@ script = ExtResource("1_script")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1457261901]
 z_index = -10
-anchors_preset = 15
+texture_filter = 1
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("6_background")
 expand_mode = 1
-stretch_mode = 0
-texture_filter = 1
 
 [node name="Overlay" type="ColorRect" parent="." unique_id=1589214473]
 layout_mode = 0
@@ -93,7 +92,7 @@ offset_right = 474.0
 offset_bottom = 642.0
 theme_override_colors/font_color = Color(0.84, 0.87, 0.9, 1)
 theme_override_font_sizes/font_size = 16
-text = "VERSAO BETA 2.2 WORK IN PROGRESS"
+text = "BETA RELEASE 3.0 - OUTUBRO"
 
 [node name="MenuContainer" type="VBoxContainer" parent="." unique_id=1517866752]
 visible = false

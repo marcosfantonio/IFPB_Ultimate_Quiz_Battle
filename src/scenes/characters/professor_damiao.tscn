@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/professor_idle.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/professores/damiao/idle_1.png" id="2_idle"]
+
+[node name="ProfessorDamiao" type="Node2D"]
+z_index = -50
+position = Vector2(576, 455)
+script = ExtResource("1_script")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, 140)
+texture = ExtResource("2_idle")
+flip_v = true
+modulate = Color(0, 0, 0, 0.3)
+texture_filter = 1
+scale = Vector2(2, 0.6)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_idle")
+texture_filter = 1
+scale = Vector2(2, 2)

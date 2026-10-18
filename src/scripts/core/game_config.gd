@@ -35,6 +35,12 @@ const TRAIL_MAX_POINTS = 80
 const IDLE_FIRST_DELAY_RANGE = Vector2(2.0, 6.0)
 const IDLE_POSE_RANGE = Vector2(1.5, 3.5)  # quanto tempo fica na pose alternativa
 const IDLE_WAIT_RANGE = Vector2(3.0, 7.0)  # quanto tempo espera até trocar de pose
+const PROFESSOR_IDLE_FRAME_DURATION = 1.25
+const PROFESSOR_MOVE_DISTANCE = 450.0
+const PROFESSOR_MOVE_DURATION = 1.5
+const PROFESSOR_MOVE_PAUSE = 6.0
+const PROFESSOR_TURN_PREPARE_TIME = 1.0
+const PROFESSOR_MOVE_INTERVAL_RANGE = Vector2(4.0, 8.0)
 
 # --- Dados ---
 const QUESTIONS_PATH = "res://data/questions.json"

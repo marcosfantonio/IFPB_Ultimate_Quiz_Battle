@@ -5,13 +5,15 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/question_panel.tscn" id="3_question"]
 [ext_resource type="PackedScene" path="res://scenes/ui/label_plate.tscn" id="4_controls"]
 [ext_resource type="Theme" path="res://themes/game_theme.tres" id="5_theme"]
-[ext_resource type="Texture2D" path="res://assets/background/cenario.png" id="6_background"]
+[ext_resource type="Texture2D" uid="uid://cml1tyqffp8yg" path="res://assets/background/cenario.png" id="6_background"]
+[ext_resource type="PackedScene" path="res://scenes/characters/professor_damiao.tscn" id="7_professor"]
 
 [node name="BattleHud" type="Control" unique_id=841811301]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
+mouse_filter = 2
 theme = ExtResource("5_theme")
 script = ExtResource("1_script")
 
@@ -22,24 +24,24 @@ offset_right = 1152.0
 offset_bottom = 648.0
 texture = ExtResource("6_background")
 expand_mode = 1
-stretch_mode = 0
+
+[node name="ProfessorDamiao" parent="." unique_id=1227937901 instance=ExtResource("7_professor")]
+position = Vector2(383, 333)
+scale = Vector2(1.1, 1.1)
 
 [node name="Player1" parent="." unique_id=426706398 instance=ExtResource("2_player")]
 layout_mode = 0
 offset_left = -20.0
 offset_top = 190.0
+offset_right = 348.0
+offset_bottom = 626.0
 
 [node name="Player2" parent="." unique_id=452166676 instance=ExtResource("2_player")]
 layout_mode = 0
 offset_left = 812.0
 offset_top = 190.0
-
-[node name="QuestionPanel" parent="." unique_id=742943763 instance=ExtResource("3_question")]
-layout_mode = 0
-offset_left = 280.0
-offset_top = 21.455
-offset_right = 880.0
-offset_bottom = 339.455
+offset_right = 1180.0
+offset_bottom = 626.0
 
 [node name="ControlsHint" parent="." unique_id=538892570 instance=ExtResource("4_controls")]
 z_index = 11
@@ -48,3 +50,6 @@ layout_mode = 0
 offset_top = 610.0
 offset_right = 1152.0
 offset_bottom = 640.0
+
+[node name="QuestionPanel" parent="." unique_id=742943763 instance=ExtResource("3_question")]
+layout_mode = 0
