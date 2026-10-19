@@ -5,6 +5,7 @@ extends Control
 ## para mostrar/esconder tudo de uma vez.
 
 var question_panel: QuestionPanel
+var professor: ProfessorIdle
 var _controls_hint: Control
 
 var _player_panels: Dictionary = {}
@@ -20,6 +21,7 @@ func _ready() -> void:
 	panel_2.setup(2)
 	_player_panels[2] = panel_2
 	question_panel = $QuestionPanel as QuestionPanel
+	professor = $ProfessorDamiao as ProfessorIdle
 	_controls_hint = $ControlsHint as LabelPlate
 	ControlsHint.configure(_controls_hint as LabelPlate)
 	UITheme.apply_font(_controls_hint)

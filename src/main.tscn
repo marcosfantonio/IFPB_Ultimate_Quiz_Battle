@@ -15,6 +15,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/battle_intro_screen.tscn" id="14_intro"]
 [ext_resource type="PackedScene" path="res://scenes/ui/battle_results_screen.tscn" id="15_results"]
 [ext_resource type="PackedScene" path="res://scenes/ui/screen_transition.tscn" id="16_transition"]
+[ext_resource type="PackedScene" path="res://scenes/ui/professor_fatality_screen.tscn" id="17_professor_fatality"]
+[ext_resource type="PackedScene" path="res://scenes/ui/professor_fatality_screen.tscn" id="17_professor_fatality"]
 
 [node name="Main" type="Node2D" unique_id=1500224833]
 z_index = 10
@@ -67,3 +69,6 @@ visible = false
 layout_mode = 3
 
 [node name="ScreenTransition" parent="UI" unique_id=263020295 instance=ExtResource("16_transition")]
+
+[node name="ProfessorFatalityScreen" parent="UI" instance=ExtResource("17_professor_fatality")]
+visible = false

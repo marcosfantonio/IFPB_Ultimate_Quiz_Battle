@@ -1,5 +1,45 @@
 # IFPB Ultimate Quiz Battle
 
+Jogo de perguntas competitivo para dois jogadores, desenvolvido em Godot. Os jogadores respondem
+simultaneamente às questões: cada acerto dispara uma bola de papel contra o adversário. Vence quem
+esgotar primeiro a vida do oponente.
+
+O professor pune respostas excessivamente rápidas: três respostas abaixo de 2 segundos em questões
+consecutivas, ou dois acertos consecutivos nesse intervalo, acionam o fatality e causam 40% da vida
+máxima de dano ao jogador responsável.
+
+## Como executar
+
+1. Abra `src/project.godot` no Godot 4.7 ou superior.
+2. Execute o projeto com **F6/F5** ou pelo botão **Executar projeto**.
+3. No menu inicial, pressione **Enter**, escolha **Nova Batalha** e informe os nomes dos
+   representantes e das equipes.
+
+## Controles
+
+| Ação | Player 1 | Player 2 |
+|---|---|---|
+| Selecionar alternativa 1 | `1` | `Z` |
+| Selecionar alternativa 2 | `2` | `X` |
+| Selecionar alternativa 3 | `3` | `C` |
+
+- No menu: **↑/↓** para escolher e **Enter** para confirmar.
+- **Esc** volta das telas de opções, cadastro e criador de questões.
+- Debug: digite `VENCEU` durante uma pergunta para o Player 1 acertar um golpe letal, ou `TRIGGER`
+  para executar o fatality do professor contra o Player 2.
+
+## Bancos de questões
+
+No menu **Criador de Questoes**, é possível criar ou importar bancos JSON, editar questões,
+alternativas, resposta correta, categoria e dificuldade, exportar o banco e selecioná-lo para a
+próxima partida. Cada questão usa três alternativas.
+
+## Tecnologias
+
+- Godot Engine 4.7+
+- GDScript e cenas `.tscn`
+- Resolução-base: 1152×648 (16:9)
+
 ## Screenshots
 
 <p align="center">

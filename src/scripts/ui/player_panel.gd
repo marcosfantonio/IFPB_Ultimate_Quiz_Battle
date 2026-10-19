@@ -24,6 +24,7 @@ var _info_stack: VBoxContainer
 var _info_row: HBoxContainer
 var _animation_id: int = 0
 var _animating: bool = false
+var _fatality_sprite_layer_active: bool = false
 
 
 func setup(id: int) -> void:
@@ -70,6 +71,20 @@ func setup(id: int) -> void:
 
 func set_hp(value: float) -> void:
 	_hp_bar.value = value
+
+
+func set_fatality_sprite_layer(active: bool) -> void:
+	# Keep only the player artwork above the professor; the rage image is higher still.
+	_fatality_sprite_layer_active = active
+	var layer: int = 1192 if active else 0
+	_sprite.z_index = layer
+	_sprite_shadow.z_index = layer
+	_sprite.modulate = Color(0.35, 0.35, 0.35, 1.0) if active else Color.WHITE
+
+
+func fade_fatality_sprite_tint(duration: float) -> void:
+	var tween := create_tween()
+	tween.tween_property(_sprite, "modulate", Color.WHITE, duration)
 
 
 func set_identity(representative: String, team: String) -> void:
@@ -137,7 +152,8 @@ func finish_dizzy_animation() -> void:
 func flash() -> void:
 	_sprite.modulate = Color(3, 3, 3)  # silhueta branca intensa
 	var tween := create_tween()
-	tween.tween_property(_sprite, "modulate", Color.WHITE, FLASH_DURATION)
+	var resting_tint := Color(0.35, 0.35, 0.35, 1.0) if _fatality_sprite_layer_active else Color.WHITE
+	tween.tween_property(_sprite, "modulate", resting_tint, FLASH_DURATION)
 
 
 ## Ponto (global) na borda esquerda ou direita do sprite, na altura do meio.
@@ -168,6 +184,19 @@ func get_sprite_y(vertical_ratio: float) -> float:
 	var scale_factor: float = rect.size.y / float(texture_image.get_height())
 	var y_ratio: float = lerpf(float(visible_rect.position.y), float(visible_rect.end.y), vertical_ratio)
 	return rect.position.y + y_ratio * scale_factor
+
+
+func get_sprite_center() -> Vector2:
+	var rect := _sprite.get_global_rect()
+	var texture_image := GameAssets.TEX_STUDENT_IDLE.get_image()
+	var visible_rect := texture_image.get_used_rect()
+	var scale_x: float = rect.size.x / float(texture_image.get_width())
+	var scale_y: float = rect.size.y / float(texture_image.get_height())
+	var center_x: float = (float(visible_rect.position.x) + float(visible_rect.end.x)) * 0.5
+	if _sprite.flip_h:
+		center_x = float(texture_image.get_width()) - center_x
+	var center_y: float = (float(visible_rect.position.y) + float(visible_rect.end.y)) * 0.5
+	return Vector2(rect.position.x + center_x * scale_x, rect.position.y + center_y * scale_y)
 
 
 ## Onde o texto flutuante ("ACERTOU!"/"ERROU!") deve nascer.

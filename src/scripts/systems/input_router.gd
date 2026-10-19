@@ -7,8 +7,9 @@ signal start_requested
 signal answer_requested(player: int, option_index: int)
 signal menu_move_requested(direction: int)
 signal debug_win_requested
+signal debug_fatality_requested
 
-const DEBUG_COMMAND = "VENCEU"
+const DEBUG_COMMANDS = ["VENCEU", "TRIGGER"]
 const DEBUG_INPUT_TIMEOUT_MS = 1800
 
 var _debug_buffer: String = ""
@@ -51,12 +52,24 @@ func _capture_debug_command(keycode: int) -> bool:
 
 	var character := String.chr(keycode).to_upper()
 	var candidate := _debug_buffer + character
-	if DEBUG_COMMAND.begins_with(candidate):
+	var matching_command: String = ""
+	for command in DEBUG_COMMANDS:
+		if command.begins_with(candidate):
+			matching_command = command
+			break
+	if not matching_command.is_empty():
 		_debug_buffer = candidate
-		if _debug_buffer == DEBUG_COMMAND:
+		if _debug_buffer == matching_command:
+			if matching_command == "VENCEU":
+				debug_win_requested.emit()
+			else:
+				debug_fatality_requested.emit()
 			_debug_buffer = ""
-			debug_win_requested.emit()
 		return true
 
-	_debug_buffer = "V" if character == "V" else ""
+	_debug_buffer = ""
+	for command in DEBUG_COMMANDS:
+		if command.begins_with(character):
+			_debug_buffer = character
+			break
 	return not _debug_buffer.is_empty()

@@ -12,6 +12,10 @@ var _match := MatchState.new()
 var _repository := QuestionRepository.new()
 var _correct_counts: Dictionary = {1: 0, 2: 0}
 var _error_counts: Dictionary = {1: 0, 2: 0}
+var _fast_question_streaks: Dictionary = {1: 0, 2: 0}
+var _fast_correct_streaks: Dictionary = {1: 0, 2: 0}
+var _answered_players_this_question: Array[int] = []
+var _question_started_at_msec: int = 0
 var _debug_lethal_pending: bool = false
 
 var _audio: AudioManager
@@ -25,6 +29,7 @@ var _question_creator_screen: QuestionCreatorScreen
 var _battle_setup_screen: BattleSetupScreen
 var _battle_intro_screen: BattleIntroScreen
 var _battle_results_screen: BattleResultsScreen
+var _professor_fatality_screen: ProfessorFatalityScreen
 var _menu_transitioning: bool = false
 var _ui_layer: CanvasLayer
 var _screen_transition_overlay: ColorRect
@@ -57,6 +62,7 @@ func _create_systems() -> void:
 	input_router.start_requested.connect(_on_start_requested)
 	input_router.menu_move_requested.connect(_on_menu_move_requested)
 	input_router.debug_win_requested.connect(_on_debug_win_requested)
+	input_router.debug_fatality_requested.connect(_on_debug_fatality_requested)
 	input_router.answer_requested.connect(_on_answer_requested)
 	var idle_animator_1 := $IdleAnimator1 as IdleAnimator
 	idle_animator_1.setup(1)
@@ -79,6 +85,7 @@ func _create_ui() -> void:
 	_battle_setup_screen = $UI/BattleSetupScreen as BattleSetupScreen
 	_battle_intro_screen = $UI/BattleIntroScreen as BattleIntroScreen
 	_battle_results_screen = $UI/BattleResultsScreen as BattleResultsScreen
+	_professor_fatality_screen = $UI/ProfessorFatalityScreen as ProfessorFatalityScreen
 	_screen_transition_overlay = $UI/ScreenTransition as ColorRect
 
 
@@ -100,6 +107,8 @@ func _connect_signals() -> void:
 	_battle_intro_screen.player_name_revealed.connect(_on_intro_player_name_revealed)
 	_battle_intro_screen.battle_reveal_started.connect(_on_battle_reveal_started)
 	_battle_intro_screen.finished.connect(_on_battle_intro_finished)
+	_battle_intro_screen.fight_appeared.connect(func() -> void: _audio.play_sfx(GameAssets.Sfx.HIT))
+	_battle_intro_screen.fight_disappearing.connect(func() -> void: _audio.play_sfx(GameAssets.Sfx.HIT))
 	_battle_results_screen.finished.connect(_on_battle_results_finished)
 
 
@@ -136,6 +145,12 @@ func _on_debug_win_requested() -> void:
 	_launch_projectile(1)
 
 
+func _on_debug_fatality_requested() -> void:
+	if _phase != GamePhase.State.QUESTION or _projectile.is_flying():
+		return
+	_start_professor_fatality(2)
+
+
 func _on_new_battle_requested() -> void:
 	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_start_screen.visible = false
@@ -150,12 +165,16 @@ func _on_battle_setup_started(player_1_name: String, player_1_team: String, play
 	for player in GameConfig.PLAYERS:
 		_correct_counts[player] = 0
 		_error_counts[player] = 0
+		_fast_question_streaks[player] = 0
+		_fast_correct_streaks[player] = 0
+	_answered_players_this_question.clear()
 	_debug_lethal_pending = false
 	_hud.get_panel(1).set_identity(player_1_name, player_1_team)
 	_hud.get_panel(2).set_identity(player_2_name, player_2_team)
 	_battle_setup_screen.visible = false
 	_hud.visible = true
 	_hud.set_intro_mode(true)
+	_hud.professor.set_battle_intro_mode(true)
 	_phase = GamePhase.State.BATTLE_INTRO
 	_battle_intro_screen.play(player_1_name, player_1_team, player_2_name, player_2_team)
 
@@ -170,6 +189,7 @@ func _on_battle_reveal_started() -> void:
 
 func _on_battle_intro_finished() -> void:
 	_audio.play_battle_bgm()
+	_hud.professor.set_battle_intro_mode(false)
 	_phase = GamePhase.State.WAITING
 	_round.start_round()
 	_start_screen.queue_free()
@@ -265,6 +285,12 @@ func _on_pose_changed(player: int, alt_pose: bool) -> void:
 # ==================== RODADA ====================
 
 func _on_question_started(question: Question) -> void:
+	for player in GameConfig.PLAYERS:
+		if not _answered_players_this_question.has(player):
+			_fast_question_streaks[player] = 0
+			_fast_correct_streaks[player] = 0
+	_answered_players_this_question.clear()
+	_question_started_at_msec = Time.get_ticks_msec()
 	_phase = GamePhase.State.QUESTION
 	_audio.play_sfx(GameAssets.Sfx.NEW_QUESTION)
 	_hud.question_panel.show_question(question)
@@ -273,16 +299,116 @@ func _on_question_started(question: Question) -> void:
 func _on_answer_resolved(player: int, option_index: int, correct: bool) -> void:
 	_hud.question_panel.highlight_answer(_round.current_question.correct_index, option_index)
 	var origin := _hud.get_panel(player).get_floating_text_origin()
+	var elapsed_seconds: float = float(Time.get_ticks_msec() - _question_started_at_msec) / 1000.0
+	var answered_fast: bool = elapsed_seconds < GameConfig.FAST_ANSWER_TIME_LIMIT
+	if not _answered_players_this_question.has(player):
+		_answered_players_this_question.append(player)
+	if answered_fast:
+		_fast_question_streaks[player] += 1
+	else:
+		_fast_question_streaks[player] = 0
+	if correct and answered_fast:
+		_fast_correct_streaks[player] += 1
+	else:
+		_fast_correct_streaks[player] = 0
+	var triggered_fatality: bool = (
+		_fast_question_streaks[player] >= GameConfig.FAST_ANSWER_QUESTION_STREAK
+		or _fast_correct_streaks[player] >= GameConfig.FAST_CORRECT_ANSWER_STREAK
+	)
 
 	if correct:
 		_correct_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.CORRECT)
 		FloatingText.spawn(_ui_layer, origin, "ACERTOU!", Color(0.2, 1, 0.3))
-		_launch_projectile(player)
+		if triggered_fatality:
+			_start_professor_fatality(player)
+		else:
+			_launch_projectile(player)
 	else:
 		_error_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.WRONG)
 		FloatingText.spawn(_ui_layer, origin, "ERROU!", Color(1, 0.2, 0.2))
+		if triggered_fatality:
+			_start_professor_fatality(player)
+
+
+func _start_professor_fatality(player: int) -> void:
+	_phase = GamePhase.State.PROFESSOR_FATALITY
+	_round.stop()
+	_answered_players_this_question.clear()
+	for player_id in GameConfig.PLAYERS:
+		_fast_question_streaks[player_id] = 0
+		_fast_correct_streaks[player_id] = 0
+
+	_audio.fade_to_fatality_bgm(GameConfig.PROFESSOR_FATALITY_BGM_FADE)
+	_audio.play_sfx(GameAssets.Sfx.PROFESSOR_RAGE)
+	for player_id in GameConfig.PLAYERS:
+		_hud.get_panel(player_id).set_fatality_sprite_layer(true)
+	_hud.professor.begin_fatality()
+	_professor_fatality_screen.show_rage_idle()
+	await get_tree().create_timer(GameConfig.PROFESSOR_RAGE_IDLE_DURATION).timeout
+	_professor_fatality_screen.rage_fade_out_started.connect(
+		func() -> void: _audio.play_sfx(GameAssets.Sfx.PROFESSOR_LOOKS), CONNECT_ONE_SHOT
+	)
+	_professor_fatality_screen.fatality_fade_started.connect(
+		func() -> void: _audio.play_sfx(GameAssets.Sfx.PROFESSOR_JUMP), CONNECT_ONE_SHOT
+	)
+	_professor_fatality_screen.fatality_fade_finished.connect(
+		func() -> void: _audio.play_sfx(GameAssets.Sfx.PROFESSOR_JUMP), CONNECT_ONE_SHOT
+	)
+	await _professor_fatality_screen.play_rage_image()
+
+	_professor_fatality_screen.show_jump_phase()
+	_hud.professor.set_fatality_spotlight(true)
+	_hud.professor.set_fatality_pose(GameAssets.TEX_PROFESSOR_JUMPING)
+	await get_tree().create_timer(GameConfig.PROFESSOR_JUMP_DURATION).timeout
+	_hud.professor.set_fatality_pose(GameAssets.TEX_PROFESSOR_JUMPING_2)
+	_audio.play_sfx(GameAssets.Sfx.PROFESSOR_JUMP)
+	await _hud.professor.move_fatality_to_y(
+		GameConfig.PROFESSOR_FATALITY_EXIT_Y,
+		GameConfig.PROFESSOR_FATALITY_EXIT_DURATION
+	)
+
+	var fatality_sfx: AudioStreamPlayer = _audio.play_looping_sfx(GameAssets.Sfx.PROFESSOR_FATALITY)
+	await _professor_fatality_screen.play_special()
+	_professor_fatality_screen.show_jump_phase()
+	var professor_return: Tween = _hud.professor.return_from_fatality()
+	var spin_direction: float = -1.0 if player == 1 else 1.0
+	_audio.play_sfx(GameAssets.Sfx.DOMINOS)
+	_professor_fatality_screen.start_domino_attack(
+		_hud.get_panel(player).get_sprite_center(),
+		spin_direction
+	)
+	await _professor_fatality_screen.domino_impact_reached
+
+	_audio.stop_looping_sfx(fatality_sfx)
+	_audio.play_sfx(GameAssets.Sfx.PROFESSOR_HURT)
+	var damage: float = GameConfig.HP_MAX * GameConfig.PROFESSOR_FATALITY_DAMAGE_RATIO
+	var is_lethal: bool = _match.get_hp(player) <= damage
+	_match.apply_damage(player, damage)
+	_hud.get_panel(player).flash()
+	_hud.get_panel(player).play_hit_animation(is_lethal)
+	await get_tree().create_timer(1.5).timeout
+	await _audio.resume_paused_bgm(GameConfig.PROFESSOR_FATALITY_BGM_FADE)
+	# O fade da explosão pode terminar enquanto aguardamos a retomada da música.
+	# Não aguarde um sinal que já foi emitido.
+	if _professor_fatality_screen.is_domino_effect_running():
+		await _professor_fatality_screen.domino_effect_finished
+	if professor_return != null and professor_return.is_running():
+		await professor_return.finished
+	_hud.professor.finish_fatality()
+	for player_id in GameConfig.PLAYERS:
+		_hud.get_panel(player_id).fade_fatality_sprite_tint(GameConfig.PROFESSOR_FATALITY_SCREEN_FADE)
+	await _professor_fatality_screen.fade_back_to_game()
+	for player_id in GameConfig.PLAYERS:
+		_hud.get_panel(player_id).set_fatality_sprite_layer(false)
+	if _match.is_over():
+		_show_battle_results()
+		return
+
+	await get_tree().create_timer(GameConfig.NEXT_QUESTION_DELAY).timeout
+	_phase = GamePhase.State.WAITING
+	_round.start_round()
 
 
 # ==================== COMBATE ====================
@@ -318,19 +444,23 @@ func _on_projectile_hit(attacker: int) -> void:
 	_hud.get_panel(attacker).finish_throw()
 
 	if _match.is_over():
-		_phase = GamePhase.State.GAME_OVER
-		_round.stop()
-		_game_over_panel.visible = false
-		_audio.play_battle_lose_bgm()
-		var winner := _match.get_winner()
-		var winning_team: String = "EMPATE" if winner == 0 else _hud.get_panel(winner).get_team_name()
-		var correct_count: int = _correct_counts[winner] if winner != 0 else _correct_counts[1] + _correct_counts[2]
-		var error_count: int = _error_counts[winner] if winner != 0 else _error_counts[1] + _error_counts[2]
-		_battle_results_screen.play(winning_team, correct_count, error_count)
+		_show_battle_results()
 		return
 
 	await get_tree().create_timer(GameConfig.NEXT_QUESTION_DELAY).timeout
 	_round.start_round()
+
+
+func _show_battle_results() -> void:
+	_phase = GamePhase.State.GAME_OVER
+	_round.stop()
+	_game_over_panel.visible = false
+	_audio.play_battle_lose_bgm()
+	var winner := _match.get_winner()
+	var winning_team: String = "EMPATE" if winner == 0 else _hud.get_panel(winner).get_team_name()
+	var correct_count: int = _correct_counts[winner] if winner != 0 else _correct_counts[1] + _correct_counts[2]
+	var error_count: int = _error_counts[winner] if winner != 0 else _error_counts[1] + _error_counts[2]
+	_battle_results_screen.play(winning_team, correct_count, error_count)
 
 
 func _on_restart_requested() -> void:

@@ -5,6 +5,8 @@ extends Control
 signal player_name_revealed(player: int)
 signal battle_reveal_started
 signal finished
+signal fight_appeared
+signal fight_disappearing
 
 const DARKEN_ALPHA = 0.9
 const SCREEN_FADE_IN_TIME = 1.0
@@ -77,6 +79,7 @@ func play(player_1_name: String, player_1_team: String, player_2_name: String, p
 	_player_2_block.visible = false
 	_versus_label.visible = false
 	_fight_label.visible = true
+	fight_appeared.emit()
 	var fight_blink := create_tween().set_loops()
 	fight_blink.tween_property(_fight_label, "modulate:a", 0.2, 0.2)
 	fight_blink.tween_property(_fight_label, "modulate:a", 1.0, 0.2)
@@ -84,6 +87,7 @@ func play(player_1_name: String, player_1_team: String, player_2_name: String, p
 	fight_blink.kill()
 	_fight_label.modulate.a = 1.0
 
+	fight_disappearing.emit()
 	battle_reveal_started.emit()
 	var fade := create_tween()
 	fade.tween_property(self, "modulate:a", 0.0, REVEAL_TIME)
