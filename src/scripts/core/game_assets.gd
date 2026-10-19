@@ -5,7 +5,7 @@ extends RefCounted
 
 enum Sfx { SELECT, CORRECT, WRONG, NEW_QUESTION, HIT, PROFESSOR_RAGE, PROFESSOR_LOOKS, PROFESSOR_JUMP, PROFESSOR_FATALITY, PROFESSOR_HURT, DOMINOS }
 
-const FONT = preload("res://assets/fontes/upheavtt.ttf")
+const FONT = preload("res://assets/fontes/bulletinV1.ttf")
 
 const TEX_STUDENT_IDLE = preload("res://assets/player/idle_1.png")
 const TEX_STUDENT_ALT = preload("res://assets/player/looking_right.png")

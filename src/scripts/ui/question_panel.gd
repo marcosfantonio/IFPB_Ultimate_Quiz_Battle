@@ -15,6 +15,10 @@ const QUESTION_FONT_SIZE = 22
 const OPTION_FONT_SIZE = 17
 const GRID_GAP = 8
 const OPTION_SIDE_MARGIN = 12.0
+const PLAYER_ONE_COLOR = Color(1.0, 0.2, 0.2, 1.0)
+const PLAYER_TWO_COLOR = Color(0.25, 0.55, 1.0, 1.0)
+const PLAYER_ONE_KEYS = ["1", "2", "3"]
+const PLAYER_TWO_KEYS = ["Z", "X", "C"]
 
 var _question_plate: LabelPlate
 var _difficulty_plate: LabelPlate
@@ -40,6 +44,7 @@ func _ready() -> void:
 		plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		plate.label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		plate.label.add_theme_font_size_override("font_size", OPTION_FONT_SIZE)
+		_add_option_key_hints(plate, _option_plates.size())
 		plate.custom_minimum_size = Vector2(OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0, OPTION_HEIGHT)
 		plate.background.custom_minimum_size = plate.custom_minimum_size
 		plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -69,11 +74,7 @@ func show_question(question: Question) -> void:
 	for i in _option_plates.size():
 		var plate := _option_plates[i]
 		if i < question.options.size():
-			plate.set_text("[%s/%s] %s" % [
-				GameConfig.key_label(1, i),
-				GameConfig.key_label(2, i),
-				question.options[i],
-			])
+			plate.set_text(question.options[i])
 			plate.visible = true
 		else:
 			plate.visible = false
@@ -101,6 +102,32 @@ func _resize_option_plate(plate: LabelPlate) -> void:
 	var plate_size := Vector2(OPTION_WIDTH - OPTION_SIDE_MARGIN * 2.0, OPTION_HEIGHT)
 	plate.custom_minimum_size = plate_size
 	plate.background.custom_minimum_size = plate_size
+
+
+func _add_option_key_hints(plate: LabelPlate, index: int) -> void:
+	var left_hint := Label.new()
+	left_hint.name = "PlayerOneKey"
+	left_hint.text = PLAYER_ONE_KEYS[index]
+	left_hint.add_theme_color_override("font_color", PLAYER_ONE_COLOR)
+	left_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	left_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	left_hint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	left_hint.offset_left = 8
+	left_hint.offset_right = 34
+	left_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.background.add_child(left_hint)
+
+	var right_hint := Label.new()
+	right_hint.name = "PlayerTwoKey"
+	right_hint.text = PLAYER_TWO_KEYS[index]
+	right_hint.add_theme_color_override("font_color", PLAYER_TWO_COLOR)
+	right_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	right_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	right_hint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	right_hint.offset_left = -34
+	right_hint.offset_right = -8
+	right_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.background.add_child(right_hint)
 
 
 func _center_horizontally() -> void:
