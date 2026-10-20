@@ -21,6 +21,7 @@ func _ready() -> void:
 		$Cards/Player2Card/Fields/TeamEdit as LineEdit,
 	]
 	$StartButton.pressed.connect(_on_start_pressed)
+	$BackButton.pressed.connect(func() -> void: back_requested.emit())
 	UITheme.apply_font(self)
 
 

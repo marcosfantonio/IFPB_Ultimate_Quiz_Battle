@@ -1,0 +1,73 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/player/idle_1.png" id="1_portrait"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="2_theme"]
+
+[node name="RoleSlot" type="Control"]
+theme = ExtResource("2_theme")
+custom_minimum_size = Vector2(320, 336)
+
+[node name="RoleLabel" type="Label" parent="."]
+offset_right = 320.0
+offset_bottom = 22.0
+text = "PLAYER"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 17
+
+[node name="PlayerName" type="Label" parent="."]
+offset_top = 22.0
+offset_right = 320.0
+offset_bottom = 44.0
+text = "Aguardando jogador"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 15
+
+[node name="TeamName" type="Label" parent="."]
+offset_top = 43.0
+offset_right = 320.0
+offset_bottom = 63.0
+text = "Equipe —"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.8, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="Square" type="Panel" parent="."]
+offset_left = 70.0
+offset_top = 65.0
+offset_right = 250.0
+offset_bottom = 245.0
+
+[node name="Avatar" type="TextureRect" parent="Square"]
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 165.0
+offset_bottom = 165.0
+texture = ExtResource("1_portrait")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="JoinButton" type="Button" parent="."]
+offset_left = 55.0
+offset_top = 254.0
+offset_right = 265.0
+offset_bottom = 290.0
+theme_override_font_sizes/font_size = 16
+text = "JUNTAR-SE"
+
+[node name="ReadyButton" type="Button" parent="."]
+visible = false
+offset_left = 89.0
+offset_top = 254.0
+offset_right = 235.0
+offset_bottom = 290.0
+theme_override_font_sizes/font_size = 16
+text = "PRONTO?"
+
+[node name="LeaveButton" type="Button" parent="."]
+visible = false
+offset_left = 132.5
+offset_top = 300.0
+offset_right = 187.5
+offset_bottom = 330.0
+theme_override_font_sizes/font_size = 12
+text = "SAIR"

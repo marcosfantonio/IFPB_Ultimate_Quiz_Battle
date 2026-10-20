@@ -1,0 +1,187 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/battle_mode_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/background/menu.png" id="2_background"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="3_theme"]
+
+[sub_resource type="StyleBoxFlat" id="LocalNormal"]
+bg_color = Color(0.08, 0.34, 0.2, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.3, 1, 0.6, 1)
+
+[sub_resource type="StyleBoxFlat" id="LanNormal"]
+bg_color = Color(0.1, 0.24, 0.38, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.4, 0.75, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="LocalHover"]
+bg_color = Color(0.14, 0.52, 0.31, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.4, 1, 0.7, 1)
+
+[sub_resource type="StyleBoxFlat" id="LanHover"]
+bg_color = Color(0.16, 0.38, 0.58, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.55, 0.85, 1, 1)
+
+[node name="BattleModeScreen" type="Control"]
+visible = false
+z_index = 650
+theme = ExtResource("3_theme")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Shade" type="ColorRect" parent="."]
+z_index = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.015, 0.025, 0.42)
+
+[node name="Title" type="Label" parent="."]
+z_index = 2
+offset_right = 1152.0
+offset_top = 48.0
+offset_bottom = 96.0
+text = "NOVA BATALHA"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 32
+
+[node name="Cards" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LocalButton" type="Button" parent="Cards"]
+z_index = 2
+offset_left = 169.5
+offset_top = 190.0
+offset_right = 404.5
+offset_bottom = 425.0
+focus_neighbor_left = NodePath("../JoinButton")
+focus_neighbor_right = NodePath("../HostButton")
+focus_neighbor_bottom = NodePath("../../BackButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("LocalNormal")
+theme_override_styles/hover = SubResource("LocalHover")
+theme_override_styles/pressed = SubResource("LocalHover")
+theme_override_styles/focus = SubResource("LocalHover")
+theme_override_font_sizes/font_size = 64
+text = "01"
+
+[node name="LocalCaption" type="Label" parent="Cards"]
+z_index = 2
+offset_left = 159.5
+offset_top = 436.0
+offset_right = 414.5
+offset_bottom = 494.0
+text = "Jogo Local"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="HostButton" type="Button" parent="Cards"]
+z_index = 2
+offset_left = 458.5
+offset_top = 190.0
+offset_right = 693.5
+offset_bottom = 425.0
+focus_neighbor_left = NodePath("../LocalButton")
+focus_neighbor_right = NodePath("../JoinButton")
+focus_neighbor_bottom = NodePath("../../BackButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("LanNormal")
+theme_override_styles/hover = SubResource("LanHover")
+theme_override_styles/pressed = SubResource("LanHover")
+theme_override_styles/focus = SubResource("LanHover")
+theme_override_font_sizes/font_size = 64
+text = "02"
+
+[node name="HostCaption" type="Label" parent="Cards"]
+z_index = 2
+offset_left = 448.5
+offset_top = 436.0
+offset_right = 703.5
+offset_bottom = 494.0
+text = "Criar Servidor\nLocal"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="JoinButton" type="Button" parent="Cards"]
+z_index = 2
+offset_left = 747.5
+offset_top = 190.0
+offset_right = 982.5
+offset_bottom = 425.0
+focus_neighbor_left = NodePath("../HostButton")
+focus_neighbor_right = NodePath("../LocalButton")
+focus_neighbor_bottom = NodePath("../../BackButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("LanNormal")
+theme_override_styles/hover = SubResource("LanHover")
+theme_override_styles/pressed = SubResource("LanHover")
+theme_override_styles/focus = SubResource("LanHover")
+theme_override_font_sizes/font_size = 64
+text = "03"
+
+[node name="JoinCaption" type="Label" parent="Cards"]
+z_index = 2
+offset_left = 737.5
+offset_top = 436.0
+offset_right = 992.5
+offset_bottom = 494.0
+text = "Juntar-se a\nServidor Local"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="BackButton" type="Button" parent="."]
+z_index = 2
+offset_left = 486.0
+offset_top = 570.0
+offset_right = 666.0
+offset_bottom = 612.0
+focus_neighbor_top = NodePath("Cards/HostButton")
+text = "VOLTAR"

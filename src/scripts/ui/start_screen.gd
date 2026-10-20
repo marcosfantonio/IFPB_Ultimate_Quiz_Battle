@@ -6,6 +6,7 @@ extends Control
 signal options_pressed
 signal battle_requested
 signal creator_requested
+signal quit_requested
 
 var _prompt_label: Label
 var _logo: TextureRect
@@ -14,6 +15,8 @@ var _options_button: TextureButton
 var _logo_material: ShaderMaterial
 var _menu_container: VBoxContainer
 var _menu_arrows: Array[Label] = []
+var _menu_rows: Array[Control] = []
+var audio_manager: AudioManager
 var _blink_time: float = 0.0
 var _logo_time: float = 0.0
 var menu_open: bool = false
@@ -32,15 +35,31 @@ func _ready() -> void:
 	_logo_shine = $LogoShine as TextureRect
 	_logo_shine.z_index = 1
 	_menu_container = $MenuContainer as VBoxContainer
+	_menu_rows = [
+		$MenuContainer/OptionOne as Control,
+		$MenuContainer/OptionTwo as Control,
+		$MenuContainer/OptionThree as Control,
+	]
 	_menu_arrows = [
 		$MenuContainer/OptionOne/Arrow as Label,
 		$MenuContainer/OptionTwo/Arrow as Label,
+		$MenuContainer/OptionThree/Arrow as Label,
 	]
 	_prompt_label.visible = true
 	_menu_container.visible = false
 	_options_button = $OptionsButton as TextureButton
 	_logo_material = _logo_shine.material as ShaderMaterial
 	_options_button.pressed.connect(func() -> void: options_pressed.emit())
+	for index in _menu_rows.size():
+		var row := _menu_rows[index]
+		row.mouse_filter = Control.MOUSE_FILTER_STOP
+		row.mouse_entered.connect(_select_menu_option.bind(index))
+		row.gui_input.connect(_on_menu_row_gui_input.bind(index))
+		for child in row.get_children():
+			if child is Control:
+				(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	_prompt_label.gui_input.connect(_on_prompt_gui_input)
 	_update_menu_selection()
 	UITheme.apply_font(self)
 
@@ -77,10 +96,40 @@ func confirm_selection() -> void:
 		return
 	if _selected_option == 0:
 		battle_requested.emit()
-	else:
+	elif _selected_option == 1:
 		creator_requested.emit()
+	else:
+		quit_requested.emit()
 
 
 func _update_menu_selection() -> void:
 	for index in _menu_arrows.size():
 		_menu_arrows[index].text = "▶" if index == _selected_option and menu_open else ""
+
+
+func _select_menu_option(index: int) -> void:
+	if not menu_open:
+		return
+	_selected_option = index
+	_update_menu_selection()
+
+
+func _on_menu_row_gui_input(event: InputEvent, index: int) -> void:
+	if not menu_open or not event is InputEventMouseButton:
+		return
+	var mouse_event := event as InputEventMouseButton
+	if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+		_play_select_sound()
+		_select_menu_option(index)
+		confirm_selection()
+
+
+func _on_prompt_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and (event as InputEventMouseButton).pressed:
+		_play_select_sound()
+		open_menu()
+
+
+func _play_select_sound() -> void:
+	if is_instance_valid(audio_manager):
+		audio_manager.play_sfx(GameAssets.Sfx.SELECT)

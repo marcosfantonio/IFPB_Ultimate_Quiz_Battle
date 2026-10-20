@@ -27,6 +27,9 @@ var _start_screen: StartScreen
 var _options_screen: OptionsScreen
 var _question_creator_screen: QuestionCreatorScreen
 var _battle_setup_screen: BattleSetupScreen
+var _battle_mode_screen: Control
+var _lan_server_screen: Control
+var _lan_network: Node
 var _battle_intro_screen: BattleIntroScreen
 var _battle_results_screen: BattleResultsScreen
 var _professor_fatality_screen: ProfessorFatalityScreen
@@ -41,12 +44,39 @@ const START_SCREEN_SCENE = preload("res://scenes/ui/start_screen.tscn")
 func _ready() -> void:
 	z_index = 10
 	_repository.load_from_file(GameConfig.QUESTIONS_PATH)
+	_load_persisted_question_bank()
 
 	_create_systems()
+	_lan_network = Node.new()
+	_lan_network.name = "LanNetwork"
+	_lan_network.set_script(load("res://scripts/systems/lan_network.gd"))
+	add_child(_lan_network)
 	_create_ui()
+	_wire_button_sounds(_ui_layer)
 	_connect_signals()
 
 	_audio.play_menu_bgm()
+
+
+func _load_persisted_question_bank() -> void:
+	var selection_path := "user://question_banks/active_bank.cfg"
+	if not FileAccess.file_exists(selection_path):
+		return
+	var selection_file := FileAccess.open(selection_path, FileAccess.READ)
+	if selection_file == null:
+		return
+	var filename := selection_file.get_as_text().strip_edges()
+	if filename.is_empty() or filename.get_file() != filename:
+		return
+	var bank_path := "user://question_banks/%s" % filename
+	if not FileAccess.file_exists(bank_path):
+		return
+	var bank_file := FileAccess.open(bank_path, FileAccess.READ)
+	if bank_file == null:
+		return
+	var bank_data: Variant = JSON.parse_string(bank_file.get_as_text())
+	if bank_data is Dictionary and bank_data.get("questions") is Array:
+		_repository.load_from_data(bank_data)
 
 
 # ==================== SETUP ====================
@@ -83,6 +113,8 @@ func _create_ui() -> void:
 	_options_screen.audio_manager = _audio
 	_question_creator_screen = $UI/QuestionCreatorScreen as QuestionCreatorScreen
 	_battle_setup_screen = $UI/BattleSetupScreen as BattleSetupScreen
+	_battle_mode_screen = $UI/BattleModeScreen as BattleModeScreen
+	_lan_server_screen = $UI/LanServerPlaceholder as Control
 	_battle_intro_screen = $UI/BattleIntroScreen as BattleIntroScreen
 	_battle_results_screen = $UI/BattleResultsScreen as BattleResultsScreen
 	_professor_fatality_screen = $UI/ProfessorFatalityScreen as ProfessorFatalityScreen
@@ -103,6 +135,22 @@ func _connect_signals() -> void:
 	_question_creator_screen.back_requested.connect(_on_back_from_creator)
 	_battle_setup_screen.start_requested.connect(_on_battle_setup_started)
 	_battle_setup_screen.back_requested.connect(_on_back_from_battle_setup)
+	_battle_mode_screen.connect("local_requested", _on_local_battle_requested)
+	_battle_mode_screen.connect("host_requested", _on_lan_host_requested)
+	_battle_mode_screen.connect("join_requested", _on_lan_join_requested)
+	_battle_mode_screen.connect("back_requested", _on_back_from_battle_mode)
+	_lan_server_screen.connect("back_requested", _on_back_from_lan_server)
+	_lan_server_screen.connect("test_match_requested", _on_lan_test_match_requested)
+	_lan_server_screen.connect("host_requested", _on_lan_host_create_requested)
+	_lan_server_screen.connect("join_requested", _on_lan_join_connect_requested)
+	_lan_server_screen.connect("role_claim_requested", _lan_network.claim_role)
+	_lan_server_screen.connect("ready_changed", _lan_network.set_ready)
+	_lan_server_screen.connect("start_network_requested", _lan_network.request_start)
+	_lan_server_screen.connect("discovery_requested", _lan_network.start_discovery)
+	_lan_network.connection_changed.connect(_lan_server_screen.call.bind("set_network_status"))
+	_lan_network.lobby_changed.connect(_lan_server_screen.call.bind("apply_network_lobby"))
+	_lan_network.servers_discovered.connect(_lan_server_screen.call.bind("show_discovered_servers"))
+	_lan_network.match_started.connect(_on_lan_network_match_started)
 	_question_creator_screen.bank_selected.connect(_on_question_bank_selected)
 	_battle_intro_screen.player_name_revealed.connect(_on_intro_player_name_revealed)
 	_battle_intro_screen.battle_reveal_started.connect(_on_battle_reveal_started)
@@ -113,9 +161,44 @@ func _connect_signals() -> void:
 
 
 func _connect_start_screen_signals() -> void:
+	_start_screen.audio_manager = _audio
 	_start_screen.options_pressed.connect(_on_options_pressed)
 	_start_screen.battle_requested.connect(_on_new_battle_requested)
 	_start_screen.creator_requested.connect(_on_creator_requested)
+	_start_screen.quit_requested.connect(_on_quit_requested)
+
+
+func _on_quit_requested() -> void:
+	get_tree().quit()
+
+
+func _wire_button_sounds(root: Node) -> void:
+	get_tree().node_added.connect(_on_ui_node_added)
+	_connect_button_sound_recursive(root)
+
+
+func _on_ui_node_added(node: Node) -> void:
+	if node is BaseButton and is_instance_valid(_ui_layer) and _ui_layer.is_ancestor_of(node):
+		_connect_button_sound(node as BaseButton)
+
+
+func _connect_button_sound_recursive(node: Node) -> void:
+	if node is BaseButton:
+		_connect_button_sound(node as BaseButton)
+	for child in node.get_children():
+		_connect_button_sound_recursive(child)
+
+
+func _connect_button_sound(button: BaseButton) -> void:
+	if button.has_meta("select_sfx_connected"):
+		return
+	button.set_meta("select_sfx_connected", true)
+	button.pressed.connect(_play_button_select_sfx)
+
+
+func _play_button_select_sfx() -> void:
+	if is_instance_valid(_audio):
+		_audio.play_sfx(GameAssets.Sfx.SELECT)
 
 
 # ==================== INPUT / MENU ====================
@@ -152,15 +235,79 @@ func _on_debug_fatality_requested() -> void:
 
 
 func _on_new_battle_requested() -> void:
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_start_screen.visible = false
-	_battle_setup_screen.visible = true
+	_battle_mode_screen.visible = true
 	_phase = GamePhase.State.BATTLE_SETUP
+
+
+func _on_local_battle_requested() -> void:
+	_battle_mode_screen.visible = false
+	_battle_setup_screen.visible = true
 	_battle_setup_screen.focus_first_field.call_deferred()
 
 
+func _on_lan_host_requested() -> void:
+	_battle_mode_screen.visible = false
+	_lan_server_screen.call("show_host_setup")
+	_lan_server_screen.visible = true
+
+
+func _on_lan_join_requested() -> void:
+	_battle_mode_screen.visible = false
+	_lan_server_screen.call("show_server_list")
+	_lan_server_screen.visible = true
+
+
+func _on_lan_test_match_requested(player_1_name: String, player_1_team: String, player_2_name: String, player_2_team: String) -> void:
+	_lan_server_screen.visible = false
+	_on_battle_setup_started(player_1_name, player_1_team, player_2_name, player_2_team)
+
+
+func _on_lan_host_create_requested(player_name: String, team_name: String) -> void:
+	var error: int = _lan_network.host(
+		_lan_server_screen.call("get_server_name"), player_name, team_name
+	)
+	if error == OK:
+		_lan_server_screen.call("show_network_lobby")
+		_lan_network.claim_role(0)
+
+
+func _on_lan_join_connect_requested(address: String, player_name: String, team_name: String) -> void:
+	if address.is_empty():
+		_lan_server_screen.call("set_network_status", false, "Informe o IP do computador que criou a sala.")
+		return
+	_lan_network.join(address, player_name, team_name)
+
+
+func _on_lan_network_match_started(players: Array) -> void:
+	if players.size() < 4:
+		return
+	_lan_server_screen.visible = false
+	_on_battle_setup_started(str(players[0]), str(players[1]), str(players[2]), str(players[3]))
+
+
+func _show_lan_notice(message: String) -> void:
+	var dialog := AcceptDialog.new()
+	dialog.dialog_text = message
+	add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.popup_centered()
+
+
+func _on_back_from_battle_mode() -> void:
+	_battle_mode_screen.visible = false
+	_start_screen.visible = true
+	_start_screen.open_menu()
+	_phase = GamePhase.State.START_SCREEN
+
+
+func _on_back_from_lan_server() -> void:
+	_lan_network.close()
+	_lan_server_screen.visible = false
+	_battle_mode_screen.visible = true
+
+
 func _on_battle_setup_started(player_1_name: String, player_1_team: String, player_2_name: String, player_2_team: String) -> void:
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_audio.play_battle_intro_bgm()
 	for player in GameConfig.PLAYERS:
 		_correct_counts[player] = 0
@@ -197,18 +344,15 @@ func _on_battle_intro_finished() -> void:
 
 
 func _on_back_from_battle_setup() -> void:
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_battle_setup_screen.visible = false
-	_start_screen.visible = true
-	_start_screen.open_menu()
-	_phase = GamePhase.State.START_SCREEN
+	_battle_mode_screen.visible = true
+	_phase = GamePhase.State.BATTLE_SETUP
 
 
 func _on_creator_requested() -> void:
 	if _menu_transitioning:
 		return
 	_menu_transitioning = true
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	await _fade_entire_screen_to_black()
 	_start_screen.visible = false
 	_question_creator_screen.modulate.a = 1.0
@@ -225,7 +369,6 @@ func _on_back_from_creator() -> void:
 func _on_question_bank_selected(bank_name: String, questions: Array) -> void:
 	_repository.load_from_data({"name": bank_name, "questions": questions})
 	_repository.reset_history()
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	await _return_from_creator()
 
 
@@ -262,13 +405,11 @@ func _fade_entire_screen_from_black() -> void:
 func _on_options_pressed() -> void:
 	if _menu_transitioning:
 		return
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_start_screen.visible = false
 	_options_screen.visible = true
 
 
 func _on_back_from_options() -> void:
-	_audio.play_sfx(GameAssets.Sfx.SELECT)
 	_options_screen.visible = false
 	_start_screen.visible = true
 

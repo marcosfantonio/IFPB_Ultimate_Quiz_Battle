@@ -98,9 +98,9 @@ text = "RELEASE 1.0 STABLE"
 visible = false
 layout_mode = 0
 offset_left = 348.135
-offset_top = 427.855
+offset_top = 420.0
 offset_right = 804.1355
-offset_bottom = 519.855
+offset_bottom = 562.0
 theme_override_constants/separation = 8
 
 [node name="OptionOne" type="HBoxContainer" parent="MenuContainer" unique_id=1329344959]
@@ -156,5 +156,33 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RightSpacer" type="Control" parent="MenuContainer/OptionTwo" unique_id=1645330564]
+custom_minimum_size = Vector2(36, 42)
+layout_mode = 2
+
+[node name="OptionThree" type="HBoxContainer" parent="MenuContainer"]
+custom_minimum_size = Vector2(456, 42)
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Arrow" type="Label" parent="MenuContainer/OptionThree"]
+custom_minimum_size = Vector2(36, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Text" type="Label" parent="MenuContainer/OptionThree"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Sair do Jogo"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightSpacer" type="Control" parent="MenuContainer/OptionThree"]
 custom_minimum_size = Vector2(36, 42)
 layout_mode = 2

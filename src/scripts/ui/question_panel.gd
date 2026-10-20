@@ -54,6 +54,7 @@ func _ready() -> void:
 	_question_plate.label.custom_minimum_size = _question_plate.custom_minimum_size
 	_question_plate.label.add_theme_font_size_override("font_size", QUESTION_FONT_SIZE)
 	_question_plate.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_question_plate.label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	_difficulty_plate.label.add_theme_font_size_override("font_size", 16)
 	_category_plate.label.add_theme_font_size_override("font_size", 16)
 	_center_horizontally()

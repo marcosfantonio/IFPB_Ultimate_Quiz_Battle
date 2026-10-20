@@ -1,0 +1,410 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/lan_server_placeholder.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/background/menu.png" id="2_background"]
+[ext_resource type="Theme" path="res://themes/game_theme.tres" id="3_theme"]
+[ext_resource type="PackedScene" path="res://scenes/ui/lobby_role_slot.tscn" id="4_role_slot"]
+[ext_resource type="Texture2D" path="res://assets/player/idle_1.png" id="5_portrait"]
+
+[sub_resource type="StyleBoxFlat" id="SetupPanel"]
+bg_color = Color(0.01, 0.03, 0.045, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.75, 1, 1)
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[node name="LanServerScreen" type="Control"]
+visible = false
+z_index = 670
+theme = ExtResource("3_theme")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.015, 0.025, 0.76)
+
+[node name="SetupPage" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SetupPanel" type="PanelContainer" parent="SetupPage"]
+offset_left = 300.0
+offset_top = 68.0
+offset_right = 852.0
+offset_bottom = 578.0
+theme_override_styles/panel = SubResource("SetupPanel")
+
+[node name="Layout" type="VBoxContainer" parent="SetupPage/SetupPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "CRIAR SERVIDOR LOCAL"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 28
+
+[node name="Subtitle" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "Configurações da partida"
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="ServerNameLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "NOME DO SERVIDOR"
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="ServerNameEdit" type="LineEdit" parent="SetupPage/SetupPanel/Layout"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Batalha Local"
+placeholder_text = "Nome do servidor"
+
+[node name="BankLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "BANCO DE QUESTÕES"
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="BankOption" type="OptionButton" parent="SetupPage/SetupPanel/Layout"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+
+[node name="TimerLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "TEMPORIZADOR DE QUESTÕES"
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="TimerToggle" type="Button" parent="SetupPage/SetupPanel/Layout"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "◀  DESATIVADO  ▶"
+
+[node name="FatalityLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "FATALITY POR CHUTE"
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="FatalityToggle" type="Button" parent="SetupPage/SetupPanel/Layout"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "◀  DESATIVADA  ▶"
+
+[node name="StatusLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "Servidor LAN usa UDP 28741."
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.8, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="Actions" type="HBoxContainer" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="BackButton" type="Button" parent="SetupPage/SetupPanel/Layout/Actions"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+text = "VOLTAR"
+
+[node name="CreateButton" type="Button" parent="SetupPage/SetupPanel/Layout/Actions"]
+custom_minimum_size = Vector2(220, 40)
+layout_mode = 2
+text = "CRIAR SERVIDOR"
+
+[node name="ServersPage" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="ServersPage"]
+offset_right = 1152.0
+offset_top = 55.0
+offset_bottom = 100.0
+text = "SERVIDORES LOCAIS"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 30
+
+[node name="Subtitle" type="Label" parent="ServersPage"]
+offset_right = 1152.0
+offset_top = 102.0
+offset_bottom = 130.0
+text = "Salas encontradas automaticamente na rede local (UDP 28742)"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="PreparingServer" type="PanelContainer" parent="ServersPage"]
+visible = false
+offset_left = 220.0
+offset_top = 160.0
+offset_right = 932.0
+offset_bottom = 292.0
+
+[node name="ServerAddressEdit" type="OptionButton" parent="ServersPage"]
+offset_left = 220.0
+offset_top = 136.0
+offset_right = 790.0
+offset_bottom = 176.0
+text = "Buscando servidores..."
+
+[node name="RefreshServersButton" type="Button" parent="ServersPage"]
+offset_left = 802.0
+offset_top = 136.0
+offset_right = 932.0
+offset_bottom = 176.0
+text = "ATUALIZAR"
+
+[node name="Content" type="HBoxContainer" parent="ServersPage/PreparingServer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Details" type="VBoxContainer" parent="ServersPage/PreparingServer/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Name" type="Label" parent="ServersPage/PreparingServer/Content/Details"]
+layout_mode = 2
+text = "Sala de Treino do IFPB"
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 21
+
+[node name="Status" type="Label" parent="ServersPage/PreparingServer/Content/Details"]
+layout_mode = 2
+text = "EM PREPARAÇÃO  •  Espectador: ADM IF"
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="JoinPreparingButton" type="Button" parent="ServersPage/PreparingServer/Content"]
+custom_minimum_size = Vector2(170, 48)
+layout_mode = 2
+text = "JUNTAR-SE"
+
+[node name="RunningServer" type="PanelContainer" parent="ServersPage"]
+visible = false
+offset_left = 220.0
+offset_top = 312.0
+offset_right = 932.0
+offset_bottom = 444.0
+
+[node name="Content" type="HBoxContainer" parent="ServersPage/RunningServer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Details" type="VBoxContainer" parent="ServersPage/RunningServer/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Name" type="Label" parent="ServersPage/RunningServer/Content/Details"]
+layout_mode = 2
+text = "Batalha em andamento"
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 21
+
+[node name="Status" type="Label" parent="ServersPage/RunningServer/Content/Details"]
+layout_mode = 2
+text = "BATALHA ROLANDO"
+theme_override_colors/font_color = Color(1, 0.5, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="WatchButton" type="Button" parent="ServersPage/RunningServer/Content"]
+custom_minimum_size = Vector2(170, 48)
+layout_mode = 2
+text = "ASSISTIR"
+
+[node name="BackButton" type="Button" parent="ServersPage"]
+offset_left = 486.0
+offset_top = 540.0
+offset_right = 666.0
+offset_bottom = 582.0
+text = "VOLTAR"
+
+[node name="IdentityPage" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="IdentityPanel" type="PanelContainer" parent="IdentityPage"]
+offset_left = 356.0
+offset_top = 62.0
+offset_right = 796.0
+offset_bottom = 586.0
+
+[node name="Content" type="VBoxContainer" parent="IdentityPage/IdentityPanel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="IdentityPage/IdentityPanel/Content"]
+layout_mode = 2
+text = "IDENTIFICAÇÃO DO JOGADOR"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 23
+
+[node name="Subtitle" type="Label" parent="IdentityPage/IdentityPanel/Content"]
+layout_mode = 2
+text = "Informe seu integrante e sua equipe"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="Portrait" type="TextureRect" parent="IdentityPage/IdentityPanel/Content"]
+custom_minimum_size = Vector2(180, 180)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("5_portrait")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerNameEdit" type="LineEdit" parent="IdentityPage/IdentityPanel/Content"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+placeholder_text = "NOME DO INTEGRANTE"
+
+[node name="TeamNameEdit" type="LineEdit" parent="IdentityPage/IdentityPanel/Content"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+placeholder_text = "NOME DA EQUIPE"
+
+[node name="Status" type="Label" parent="IdentityPage/IdentityPanel/Content"]
+layout_mode = 2
+text = "Os dados serão usados na partida de teste."
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.8, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="Actions" type="HBoxContainer" parent="IdentityPage/IdentityPanel/Content"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="BackButton" type="Button" parent="IdentityPage/IdentityPanel/Content/Actions"]
+custom_minimum_size = Vector2(130, 40)
+layout_mode = 2
+text = "VOLTAR"
+
+[node name="ContinueButton" type="Button" parent="IdentityPage/IdentityPanel/Content/Actions"]
+custom_minimum_size = Vector2(210, 40)
+layout_mode = 2
+text = "CONTINUAR"
+
+[node name="LobbyPage" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="LobbyPage"]
+offset_right = 1152.0
+offset_top = 16.0
+offset_bottom = 58.0
+text = "SALA: Batalha Local"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 28
+
+[node name="ReadyCount" type="Label" parent="LobbyPage"]
+offset_right = 1152.0
+offset_top = 43.0
+offset_bottom = 71.0
+text = "Prontos 0 de 3 jogadores"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 19
+
+[node name="SpectatorSlot" parent="LobbyPage" instance=ExtResource("4_role_slot")]
+offset_left = 416.0
+offset_top = 70.0
+offset_right = 736.0
+offset_bottom = 406.0
+
+[node name="PlayerOneSlot" parent="LobbyPage" instance=ExtResource("4_role_slot")]
+offset_left = 121.0
+offset_top = 260.0
+offset_right = 441.0
+offset_bottom = 596.0
+
+[node name="PlayerTwoSlot" parent="LobbyPage" instance=ExtResource("4_role_slot")]
+offset_left = 711.0
+offset_top = 260.0
+offset_right = 1031.0
+offset_bottom = 596.0
+
+[node name="BackToSetupButton" type="Button" parent="LobbyPage"]
+offset_left = 26.0
+offset_top = 604.0
+offset_right = 266.0
+offset_bottom = 644.0
+text = "VOLTAR ÀS CONFIGURAÇÕES"
+
+[node name="StartButton" type="Button" parent="LobbyPage"]
+offset_left = 451.0
+offset_top = 604.0
+offset_right = 701.0
+offset_bottom = 644.0
+disabled = true
+text = "INICIAR PARTIDA"
+
+[node name="StartWarning" type="Label" parent="LobbyPage"]
+visible = false
+offset_left = 326.0
+offset_top = 574.0
+offset_right = 826.0
+offset_bottom = 598.0
+text = "A partida deve ter no mínimo os dois jogadores prontos."
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.28, 0.25, 1)
+theme_override_font_sizes/font_size = 14

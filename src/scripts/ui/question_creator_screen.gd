@@ -28,6 +28,9 @@ var _bank_name: String = ""
 var _questions: Array[Dictionary] = []
 var _editing_index: int = -1
 var _dialog_purpose: String = ""
+var _banks_page: Control
+var _banks_list: VBoxContainer
+var _active_bank_filename: String = ""
 
 
 func _ready() -> void:
@@ -72,9 +75,13 @@ func _ready() -> void:
 
 	$HomePage/HomePanel/Content/CreateBankButton.pressed.connect(_start_new_bank)
 	$HomePage/HomePanel/Content/ImportBankButton.pressed.connect(_open_import_dialog)
+	var banks_button := _create_action_button("BANCOS IMPORTADOS", Color(0.08, 0.2, 0.3), Color(0.35, 0.75, 1.0))
+	banks_button.custom_minimum_size = Vector2(360, 54)
+	banks_button.pressed.connect(_show_banks)
+	$HomePage/HomePanel/Content.add_child(banks_button)
 	$HomePage/HomePanel/Content/HomeBackButton.pressed.connect(func() -> void: back_requested.emit())
 	$EditorPage/BackButton.pressed.connect(_show_home)
-	$EditorPage/SaveExportButton.pressed.connect(_open_export_dialog)
+	$EditorPage/SaveExportButton.pressed.connect(_save_bank)
 	$EditorPage/UseBankButton.pressed.connect(_use_bank)
 	$EditorPage/FormPanel/Form/FormButtons/CancelEditButton.pressed.connect(_clear_question_form)
 	_add_question_button.pressed.connect(_on_add_or_update_question)
@@ -83,6 +90,8 @@ func _ready() -> void:
 	_file_dialog.use_native_dialog = true
 	_file_dialog.filters = PackedStringArray(["*.json ; Arquivos JSON"])
 	_file_dialog.file_selected.connect(_on_file_selected)
+	_load_active_bank()
+	_create_banks_page()
 	UITheme.apply_font(self)
 	_show_home()
 
@@ -189,7 +198,131 @@ func _fill_pixel_rect(image: Image, x: int, y: int, width: int, height: int, col
 func _show_home() -> void:
 	_home_page.visible = true
 	_editor_page.visible = false
+	if _banks_page != null:
+		_banks_page.visible = false
 	_set_editor_background_dimmed(false)
+
+
+func _create_banks_page() -> void:
+	_banks_page = Control.new()
+	_banks_page.name = "ImportedBanksPage"
+	_banks_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_banks_page.visible = false
+	add_child(_banks_page)
+	var shade := ColorRect.new()
+	shade.color = Color(0.01, 0.025, 0.04, 0.96)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_banks_page.add_child(shade)
+	var panel := PanelContainer.new()
+	panel.position = Vector2(170, 55)
+	panel.size = Vector2(812, 540)
+	_banks_page.add_child(panel)
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 12)
+	panel.add_child(layout)
+	var title := _create_label("BANCOS IMPORTADOS", 28, Color(1, 0.82, 0.1))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	layout.add_child(scroll)
+	_banks_list = VBoxContainer.new()
+	_banks_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_banks_list)
+	var back := _create_action_button("VOLTAR", Color(0.18, 0.2, 0.25), Color(0.7, 0.75, 0.8))
+	back.pressed.connect(_show_home)
+	layout.add_child(back)
+	UITheme.apply_font(_banks_page)
+
+
+func _show_banks() -> void:
+	_home_page.visible = false
+	_editor_page.visible = false
+	_banks_page.visible = true
+	_refresh_banks_list()
+
+
+func _refresh_banks_list() -> void:
+	for child in _banks_list.get_children():
+		child.queue_free()
+	var directory := DirAccess.open("user://question_banks")
+	if directory == null:
+		_banks_list.add_child(_create_label("Nenhum banco salvo ainda.", 16, Color(0.75, 0.8, 0.85)))
+		return
+	directory.list_dir_begin()
+	var filename := directory.get_next()
+	while not filename.is_empty():
+		if not directory.current_is_dir() and filename.get_extension().to_lower() == "json":
+			_add_bank_row(filename)
+		filename = directory.get_next()
+	directory.list_dir_end()
+	if _banks_list.get_child_count() == 0:
+		_banks_list.add_child(_create_label("Nenhum banco salvo ainda.", 16, Color(0.75, 0.8, 0.85)))
+
+
+func _add_bank_row(filename: String) -> void:
+	var file := FileAccess.open("user://question_banks/%s" % filename, FileAccess.READ)
+	if file == null:
+		return
+	var data: Variant = JSON.parse_string(file.get_as_text())
+	if not (data is Dictionary) or not (data.get("questions") is Array):
+		return
+	var row := VBoxContainer.new()
+	var name := str(data.get("name", filename.get_basename()))
+	var label := _create_label("%s%s — %d questões" % ["✓ EM USO · " if filename == _active_bank_filename else "", name, data.questions.size()], 17, Color.WHITE)
+	row.add_child(label)
+	var actions := HBoxContainer.new()
+	row.add_child(actions)
+	var edit := _create_action_button("EDITAR BANCO", Color(0.1, 0.25, 0.38), Color(0.4, 0.75, 1))
+	edit.pressed.connect(_edit_saved_bank.bind(filename, data))
+	actions.add_child(edit)
+	var use := _create_action_button("USAR BANCO", Color(0.08, 0.35, 0.2), Color(0.3, 1, 0.6))
+	use.pressed.connect(_use_saved_bank.bind(filename, data))
+	actions.add_child(use)
+	var delete := _create_action_button("EXCLUIR BANCO", Color(0.38, 0.1, 0.1), Color(1, 0.35, 0.3))
+	delete.pressed.connect(_delete_saved_bank.bind(filename))
+	actions.add_child(delete)
+	_banks_list.add_child(row)
+
+
+func _edit_saved_bank(filename: String, data: Dictionary) -> void:
+	_bank_name = str(data.get("name", filename.get_basename()))
+	_bank_name_edit.text = _bank_name
+	_questions = data.get("questions", []).duplicate(true)
+	_editing_index = -1
+	_refresh_question_list()
+	_banks_page.visible = false
+	_editor_page.visible = true
+	_set_editor_background_dimmed(true)
+
+
+func _use_saved_bank(filename: String, data: Dictionary) -> void:
+	_active_bank_filename = filename
+	_save_active_bank()
+	bank_selected.emit(str(data.get("name", filename.get_basename())), data.get("questions", []).duplicate(true))
+
+
+func _delete_saved_bank(filename: String) -> void:
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://question_banks/%s" % filename))
+	if filename == _active_bank_filename:
+		_active_bank_filename = ""
+		_save_active_bank()
+	_refresh_banks_list()
+
+
+func _load_active_bank() -> void:
+	if not FileAccess.file_exists("user://question_banks/active_bank.cfg"):
+		return
+	var file := FileAccess.open("user://question_banks/active_bank.cfg", FileAccess.READ)
+	if file:
+		_active_bank_filename = file.get_as_text().strip_edges()
+
+
+func _save_active_bank() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://question_banks"))
+	var file := FileAccess.open("user://question_banks/active_bank.cfg", FileAccess.WRITE)
+	if file:
+		file.store_string(_active_bank_filename)
 
 
 func _start_new_bank() -> void:
@@ -262,6 +395,7 @@ func _import_bank(path: String) -> void:
 	_bank_name = str(parsed.get("name", path.get_file().get_basename()))
 	_bank_name_edit.text = _bank_name
 	_questions = imported_questions
+	_save_bank_to_storage()
 	_editing_index = -1
 	_clear_question_form()
 	_refresh_question_list()
@@ -473,19 +607,25 @@ func _bank_data() -> Dictionary:
 func _save_bank() -> void:
 	if not _validate_bank_ready():
 		return
+	if not _save_bank_to_storage():
+		return
+	_set_status("Banco salvo na lista de bancos importados.", Color(0.3, 1.0, 0.67))
+
+
+func _save_bank_to_storage() -> bool:
 	var absolute_directory: String = ProjectSettings.globalize_path("user://question_banks")
 	var directory_error: Error = DirAccess.make_dir_recursive_absolute(absolute_directory)
 	if directory_error != OK and not DirAccess.dir_exists_absolute(absolute_directory):
 		_set_status("Não foi possível criar a pasta de bancos.", Color(1, 0.35, 0.3))
-		return
+		return false
 	var save_path: String = "user://question_banks/%s.json" % _safe_bank_filename()
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
 		_set_status("Falha ao salvar o banco.", Color(1, 0.35, 0.3))
-		return
+		return false
 	file.store_string(JSON.stringify(_bank_data(), "\t"))
 	file.close()
-	_set_status("Banco salvo em %s" % save_path, Color(0.3, 1.0, 0.67))
+	return true
 
 
 func _export_bank(path: String) -> void:
@@ -505,6 +645,10 @@ func _export_bank(path: String) -> void:
 func _use_bank() -> void:
 	if not _validate_bank_ready():
 		return
+	if not _save_bank_to_storage():
+		return
+	_active_bank_filename = _safe_bank_filename() + ".json"
+	_save_active_bank()
 	bank_selected.emit(_bank_name, _questions.duplicate(true))
 
 

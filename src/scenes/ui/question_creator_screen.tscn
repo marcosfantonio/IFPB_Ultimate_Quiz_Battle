@@ -138,9 +138,9 @@ grow_vertical = 2
 
 [node name="HomePanel" type="PanelContainer" parent="HomePage"]
 offset_left = 306.0
-offset_top = 125.0
+offset_top = 100.0
 offset_right = 846.0
-offset_bottom = 515.0
+offset_bottom = 550.0
 theme_override_styles/panel = SubResource("HomePanel")
 
 [node name="Content" type="VBoxContainer" parent="HomePage/HomePanel"]
@@ -483,7 +483,7 @@ offset_top = 598.0
 offset_right = 900.0
 offset_bottom = 636.0
 custom_minimum_size = Vector2(250, 38)
-text = "SALVAR / EXPORTAR JSON"
+text = "SALVAR BANCO JSON"
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("BlueButton")
 theme_override_styles/hover = SubResource("GreenButtonHover")

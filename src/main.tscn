@@ -16,6 +16,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/battle_results_screen.tscn" id="15_results"]
 [ext_resource type="PackedScene" path="res://scenes/ui/screen_transition.tscn" id="16_transition"]
 [ext_resource type="PackedScene" path="res://scenes/ui/professor_fatality_screen.tscn" id="17_professor_fatality"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_mode_screen.tscn" id="18_battle_mode"]
+[ext_resource type="PackedScene" path="res://scenes/ui/lan_server_screen.tscn" id="19_lan_server"]
 [ext_resource type="PackedScene" path="res://scenes/ui/professor_fatality_screen.tscn" id="17_professor_fatality"]
 
 [node name="Main" type="Node2D" unique_id=1500224833]
@@ -72,3 +74,7 @@ layout_mode = 3
 
 [node name="ProfessorFatalityScreen" parent="UI" instance=ExtResource("17_professor_fatality")]
 visible = false
+
+[node name="BattleModeScreen" parent="UI" instance=ExtResource("18_battle_mode")]
+
+[node name="LanServerPlaceholder" parent="UI" instance=ExtResource("19_lan_server")]
