@@ -11,6 +11,7 @@ signal role_claim_requested(role: int)
 signal ready_changed(ready: bool)
 signal discovery_requested
 signal test_match_requested(player_one_name: String, player_one_team: String, player_two_name: String, player_two_team: String)
+signal local_setup_continue_requested
 
 const SLOT_COLORS = [Color(1, 0.28, 0.24), Color(0.35, 0.8, 1), Color(0.3, 0.55, 1)]
 
@@ -25,8 +26,9 @@ var _server_address: OptionButton
 var _bank_option: OptionButton
 var _timer_toggle: Button
 var _fatality_toggle: Button
+var _professor_toggle: Button
 var _timer_enabled := false
-var _fatality_enabled := false
+var _fatality_enabled := true
 var _slots: Array[Dictionary] = []
 var _status_label: Label
 var _ready_label: Label
@@ -42,6 +44,7 @@ var _identity_flow := "host"
 var _lobby_flow := "host"
 var _participant_name := "Jogador local"
 var _participant_team := "Equipe local"
+var _local_setup_mode := false
 
 
 func _ready() -> void:
@@ -58,6 +61,7 @@ func _ready() -> void:
 	_bank_option = $SetupPage/SetupPanel/Layout/BankOption as OptionButton
 	_timer_toggle = $SetupPage/SetupPanel/Layout/TimerToggle as Button
 	_fatality_toggle = $SetupPage/SetupPanel/Layout/FatalityToggle as Button
+	_professor_toggle = $SetupPage/SetupPanel/Layout/ProfessorToggle as Button
 	_status_label = $SetupPage/SetupPanel/Layout/StatusLabel as Label
 	_ready_label = $LobbyPage/ReadyCount as Label
 	_start_warning = $LobbyPage/StartWarning as Label
@@ -69,12 +73,16 @@ func _ready() -> void:
 	_style_input(_bank_option)
 	_style_button(_timer_toggle, Color(0.025, 0.07, 0.09), Color(0.25, 0.5, 0.58))
 	_style_button(_fatality_toggle, Color(0.025, 0.07, 0.09), Color(0.25, 0.5, 0.58))
+	_style_button(_professor_toggle, Color(0.025, 0.07, 0.09), Color(0.25, 0.5, 0.58))
 	_timer_toggle.pressed.connect(_toggle_timer)
 	_fatality_toggle.pressed.connect(_toggle_fatality)
+	_professor_toggle.pressed.connect(_cycle_professor)
 	_fill_question_banks()
+	_update_timer_toggle()
+	_update_fatality_toggle()
 
 	$SetupPage/SetupPanel/Layout/Actions/BackButton.pressed.connect(func() -> void: back_requested.emit())
-	$SetupPage/SetupPanel/Layout/Actions/CreateButton.pressed.connect(_begin_host_identity)
+	$SetupPage/SetupPanel/Layout/Actions/CreateButton.pressed.connect(_on_create_pressed)
 	$ServersPage/PreparingServer/Content/JoinPreparingButton.pressed.connect(_begin_join_identity)
 	$ServersPage/RunningServer/Content/WatchButton.pressed.connect(_watch_running_server)
 	$ServersPage/BackButton.pressed.connect(func() -> void: back_requested.emit())
@@ -117,22 +125,28 @@ func _input(event: InputEvent) -> void:
 			back_requested.emit()
 		get_viewport().set_input_as_handled()
 		return
-	if event.keycode == KEY_UP or event.keycode == KEY_DOWN or event.keycode == KEY_TAB:
+	if event.keycode == KEY_UP or event.keycode == KEY_DOWN or event.keycode == KEY_TAB or event.keycode == KEY_LEFT or event.keycode == KEY_RIGHT:
 		if _focus_controls.is_empty():
 			_refresh_focus_controls()
 		if not _focus_controls.is_empty():
-			var direction := -1 if event.keycode == KEY_UP or (event.keycode == KEY_TAB and event.shift_pressed) else 1
+			var focused := get_viewport().gui_get_focus_owner()
+			if focused is LineEdit and event.keycode in [KEY_LEFT, KEY_RIGHT]:
+				return
+			if focused == _timer_toggle and event.keycode in [KEY_LEFT, KEY_RIGHT]:
+				_toggle_timer()
+				get_viewport().set_input_as_handled()
+				return
+			if focused == _fatality_toggle and event.keycode in [KEY_LEFT, KEY_RIGHT]:
+				_toggle_fatality()
+				get_viewport().set_input_as_handled()
+				return
+			if focused == _professor_toggle and event.keycode in [KEY_LEFT, KEY_RIGHT]:
+				_cycle_professor()
+				get_viewport().set_input_as_handled()
+				return
+			var direction := -1 if event.keycode in [KEY_UP, KEY_LEFT] or (event.keycode == KEY_TAB and event.shift_pressed) else 1
 			_focus_index = posmod(_focus_index + direction, _focus_controls.size())
 			_focus_controls[_focus_index].grab_focus()
-			get_viewport().set_input_as_handled()
-		return
-	if event.keycode == KEY_LEFT or event.keycode == KEY_RIGHT:
-		var focused_control := get_viewport().gui_get_focus_owner()
-		if focused_control == _timer_toggle:
-			_toggle_timer()
-			get_viewport().set_input_as_handled()
-		elif focused_control == _fatality_toggle:
-			_toggle_fatality()
 			get_viewport().set_input_as_handled()
 		return
 	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER or event.keycode == KEY_SPACE:
@@ -281,8 +295,30 @@ func show_server_list() -> void:
 
 
 func show_host_setup() -> void:
+	_local_setup_mode = false
+	$SetupPage/SetupPanel/Layout/ServerNameLabel.visible = true
+	_server_name.visible = true
+	$SetupPage/SetupPanel/Layout/Title.text = "CRIAR SERVIDOR LOCAL"
+	$SetupPage/SetupPanel/Layout/Actions/CreateButton.text = "CRIAR SERVIDOR"
 	_lobby_flow = "host"
 	_set_visible_page(_setup_page)
+
+
+func show_local_setup() -> void:
+	_local_setup_mode = true
+	$SetupPage/SetupPanel/Layout/ServerNameLabel.visible = false
+	_server_name.visible = false
+	$SetupPage/SetupPanel/Layout/Title.text = "CONFIGURAR PARTIDA LOCAL"
+	$SetupPage/SetupPanel/Layout/Actions/CreateButton.text = "CONTINUAR"
+	_lobby_flow = "local_setup"
+	_set_visible_page(_setup_page)
+
+
+func _on_create_pressed() -> void:
+	if _local_setup_mode:
+		local_setup_continue_requested.emit()
+	else:
+		_begin_host_identity()
 
 
 func _begin_host_identity() -> void:
@@ -496,14 +532,35 @@ func _style_input(control: Control) -> void:
 
 func _toggle_timer() -> void:
 	_timer_enabled = not _timer_enabled
+	_update_timer_toggle()
+
+
+func _update_timer_toggle() -> void:
 	_timer_toggle.text = "◀  1 MINUTO  ▶" if _timer_enabled else "◀  DESATIVADO  ▶"
 	_style_button(_timer_toggle, Color(0.08, 0.3, 0.2) if _timer_enabled else Color(0.025, 0.07, 0.09), Color(0.3, 1, 0.6) if _timer_enabled else Color(0.25, 0.5, 0.58))
 
 
 func _toggle_fatality() -> void:
 	_fatality_enabled = not _fatality_enabled
+	_update_fatality_toggle()
+
+
+func _update_fatality_toggle() -> void:
 	_fatality_toggle.text = "◀  ATIVADA  ▶" if _fatality_enabled else "◀  DESATIVADA  ▶"
 	_style_button(_fatality_toggle, Color(0.08, 0.3, 0.2) if _fatality_enabled else Color(0.025, 0.07, 0.09), Color(0.3, 1, 0.6) if _fatality_enabled else Color(0.25, 0.5, 0.58))
+
+
+func is_question_timer_enabled() -> bool:
+	return _timer_enabled
+
+
+func is_kick_fatality_enabled() -> bool:
+	return _fatality_enabled
+
+
+func _cycle_professor() -> void:
+	# Damien é o único professor disponível neste momento.
+	_professor_toggle.text = "◀  PROFESSOR DAMINÓ (MONTEIRO)  ▶"
 
 
 func _style_button(button: Button, fill: Color, border: Color) -> void:

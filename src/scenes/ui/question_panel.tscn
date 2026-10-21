@@ -38,6 +38,7 @@ custom_minimum_size = Vector2(120, 28)
 text = "[ MAT ]"
 
 [node name="OptionsGrid" type="GridContainer" parent="."]
+visible = false
 columns = 1
 size_flags_horizontal = 8
 theme_override_constants/h_separation = 8

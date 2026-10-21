@@ -62,14 +62,14 @@ grow_vertical = 2
 
 [node name="SetupPanel" type="PanelContainer" parent="SetupPage"]
 offset_left = 300.0
-offset_top = 68.0
+offset_top = 88.0
 offset_right = 852.0
-offset_bottom = 578.0
+offset_bottom = 552.0
 theme_override_styles/panel = SubResource("SetupPanel")
 
 [node name="Layout" type="VBoxContainer" parent="SetupPage/SetupPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="SetupPage/SetupPanel/Layout"]
 layout_mode = 2
@@ -91,7 +91,7 @@ theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="ServerNameEdit" type="LineEdit" parent="SetupPage/SetupPanel/Layout"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "Batalha Local"
 placeholder_text = "Nome do servidor"
@@ -103,7 +103,7 @@ theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="BankOption" type="OptionButton" parent="SetupPage/SetupPanel/Layout"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 
 [node name="TimerLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
@@ -113,7 +113,7 @@ theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="TimerToggle" type="Button" parent="SetupPage/SetupPanel/Layout"]
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 text = "◀  DESATIVADO  ▶"
 
@@ -124,13 +124,24 @@ theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="FatalityToggle" type="Button" parent="SetupPage/SetupPanel/Layout"]
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
-text = "◀  DESATIVADA  ▶"
+text = "◀  ATIVADA  ▶"
+
+[node name="ProfessorLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
+layout_mode = 2
+text = "PROFESSOR"
+theme_override_colors/font_color = Color(0.72, 0.84, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="ProfessorToggle" type="Button" parent="SetupPage/SetupPanel/Layout"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "◀  PROFESSOR DAMINÓ (MONTEIRO)  ▶"
 
 [node name="StatusLabel" type="Label" parent="SetupPage/SetupPanel/Layout"]
 layout_mode = 2
-text = "Servidor LAN usa UDP 28741."
+text = ""
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.7, 0.8, 0.85, 1)
 theme_override_font_sizes/font_size = 13

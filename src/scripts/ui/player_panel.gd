@@ -96,6 +96,10 @@ func get_team_name() -> String:
 	return _team_label.text
 
 
+func get_player_name() -> String:
+	return _name_label.text
+
+
 func set_intro_mode(active: bool) -> void:
 	_info_row.visible = true
 	_info_row.modulate.a = 0.0 if active else 1.0

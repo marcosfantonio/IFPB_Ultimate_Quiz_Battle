@@ -6,12 +6,12 @@ extends VBoxContainer
 const OPTION_NORMAL = Color(1, 1, 1, 1)
 const OPTION_CORRECT = Color(0.2, 1, 0.3, 1)
 const OPTION_WRONG = Color(1, 0.2, 0.2, 1)
-const PANEL_WIDTH = 600.0
+const PANEL_WIDTH = 560.0
 const OPTION_WIDTH = 520.0
-const QUESTION_HEIGHT = 96.0
+const QUESTION_HEIGHT = 140.0
 const TAG_HEIGHT = 28.0
 const OPTION_HEIGHT = 54.0
-const QUESTION_FONT_SIZE = 22
+const QUESTION_FONT_SIZE = 28
 const OPTION_FONT_SIZE = 17
 const GRID_GAP = 8
 const OPTION_SIDE_MARGIN = 12.0

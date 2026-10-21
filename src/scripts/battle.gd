@@ -14,6 +14,8 @@ var _correct_counts: Dictionary = {1: 0, 2: 0}
 var _error_counts: Dictionary = {1: 0, 2: 0}
 var _fast_question_streaks: Dictionary = {1: 0, 2: 0}
 var _fast_correct_streaks: Dictionary = {1: 0, 2: 0}
+var _correct_answer_streaks: Dictionary = {1: 0, 2: 0}
+var _fatality_charges: Dictionary = {1: 0.0, 2: 0.0}
 var _answered_players_this_question: Array[int] = []
 var _question_started_at_msec: int = 0
 var _debug_lethal_pending: bool = false
@@ -36,6 +38,11 @@ var _professor_fatality_screen: ProfessorFatalityScreen
 var _menu_transitioning: bool = false
 var _ui_layer: CanvasLayer
 var _screen_transition_overlay: ColorRect
+var _local_setup_active := false
+var _question_timer_enabled := false
+var _kick_fatality_enabled := true
+var _question_time_remaining := 0.0
+const QUESTION_TIMER_DURATION := 60.0
 
 const CREATOR_TRANSITION_TIME = 1.5
 const START_SCREEN_SCENE = preload("res://scenes/ui/start_screen.tscn")
@@ -56,6 +63,15 @@ func _ready() -> void:
 	_connect_signals()
 
 	_audio.play_menu_bgm()
+
+
+func _process(delta: float) -> void:
+	if not _question_timer_enabled or _phase != GamePhase.State.QUESTION:
+		return
+	_question_time_remaining = maxf(_question_time_remaining - delta, 0.0)
+	_hud.set_question_timer(true, _question_time_remaining)
+	if _question_time_remaining <= 0.0:
+		_round.expire_current_question()
 
 
 func _load_persisted_question_bank() -> void:
@@ -93,6 +109,7 @@ func _create_systems() -> void:
 	input_router.menu_move_requested.connect(_on_menu_move_requested)
 	input_router.debug_win_requested.connect(_on_debug_win_requested)
 	input_router.debug_fatality_requested.connect(_on_debug_fatality_requested)
+	input_router.fatality_requested.connect(_on_fatality_requested)
 	input_router.answer_requested.connect(_on_answer_requested)
 	var idle_animator_1 := $IdleAnimator1 as IdleAnimator
 	idle_animator_1.setup(1)
@@ -134,12 +151,14 @@ func _connect_signals() -> void:
 	_options_screen.back_requested.connect(_on_back_from_options)
 	_question_creator_screen.back_requested.connect(_on_back_from_creator)
 	_battle_setup_screen.start_requested.connect(_on_battle_setup_started)
+	_hud.answer_selected.connect(func(option_index: int) -> void: _on_answer_requested(1, option_index))
 	_battle_setup_screen.back_requested.connect(_on_back_from_battle_setup)
 	_battle_mode_screen.connect("local_requested", _on_local_battle_requested)
 	_battle_mode_screen.connect("host_requested", _on_lan_host_requested)
 	_battle_mode_screen.connect("join_requested", _on_lan_join_requested)
 	_battle_mode_screen.connect("back_requested", _on_back_from_battle_mode)
 	_lan_server_screen.connect("back_requested", _on_back_from_lan_server)
+	_lan_server_screen.connect("local_setup_continue_requested", _on_local_setup_continue)
 	_lan_server_screen.connect("test_match_requested", _on_lan_test_match_requested)
 	_lan_server_screen.connect("host_requested", _on_lan_host_create_requested)
 	_lan_server_screen.connect("join_requested", _on_lan_join_connect_requested)
@@ -221,7 +240,7 @@ func _on_debug_win_requested() -> void:
 	if _phase != GamePhase.State.QUESTION or _projectile.is_flying():
 		return
 	var correct_index: int = _round.current_question.correct_index
-	_hud.question_panel.highlight_answer(correct_index, correct_index)
+	_hud.highlight_answer(correct_index, correct_index, true)
 	_audio.play_sfx(GameAssets.Sfx.CORRECT)
 	FloatingText.spawn(_ui_layer, _hud.get_panel(1).get_floating_text_origin(), "ACERTOU!", Color(0.2, 1, 0.3))
 	_debug_lethal_pending = true
@@ -234,6 +253,16 @@ func _on_debug_fatality_requested() -> void:
 	_start_professor_fatality(2)
 
 
+func _on_fatality_requested(player: int) -> void:
+	if not _kick_fatality_enabled or _fatality_charges[player] < 100.0:
+		return
+	if _phase not in [GamePhase.State.QUESTION, GamePhase.State.WAITING]:
+		return
+	_fatality_charges[player] = 0.0
+	_hud.set_charge(player, 0.0, _kick_fatality_enabled)
+	_start_professor_fatality(GameConfig.opponent_of(player))
+
+
 func _on_new_battle_requested() -> void:
 	_start_screen.visible = false
 	_battle_mode_screen.visible = true
@@ -242,18 +271,30 @@ func _on_new_battle_requested() -> void:
 
 func _on_local_battle_requested() -> void:
 	_battle_mode_screen.visible = false
+	_local_setup_active = true
+	_lan_server_screen.call("show_local_setup")
+	_lan_server_screen.visible = true
+	_lan_server_screen.call_deferred("_refresh_focus_controls")
+
+
+func _on_local_setup_continue() -> void:
+	_question_timer_enabled = bool(_lan_server_screen.call("is_question_timer_enabled"))
+	_kick_fatality_enabled = bool(_lan_server_screen.call("is_kick_fatality_enabled"))
+	_lan_server_screen.visible = false
 	_battle_setup_screen.visible = true
 	_battle_setup_screen.focus_first_field.call_deferred()
 
 
 func _on_lan_host_requested() -> void:
 	_battle_mode_screen.visible = false
+	_local_setup_active = false
 	_lan_server_screen.call("show_host_setup")
 	_lan_server_screen.visible = true
 
 
 func _on_lan_join_requested() -> void:
 	_battle_mode_screen.visible = false
+	_local_setup_active = false
 	_lan_server_screen.call("show_server_list")
 	_lan_server_screen.visible = true
 
@@ -308,17 +349,22 @@ func _on_back_from_lan_server() -> void:
 
 
 func _on_battle_setup_started(player_1_name: String, player_1_team: String, player_2_name: String, player_2_team: String) -> void:
+	_hud.set_local_match(_local_setup_active)
 	_audio.play_battle_intro_bgm()
 	for player in GameConfig.PLAYERS:
 		_correct_counts[player] = 0
 		_error_counts[player] = 0
 		_fast_question_streaks[player] = 0
 		_fast_correct_streaks[player] = 0
+		_correct_answer_streaks[player] = 0
+		_fatality_charges[player] = 0.0
+		_hud.set_charge(player, 0.0, _kick_fatality_enabled)
 	_answered_players_this_question.clear()
 	_debug_lethal_pending = false
 	_hud.get_panel(1).set_identity(player_1_name, player_1_team)
 	_hud.get_panel(2).set_identity(player_2_name, player_2_team)
 	_battle_setup_screen.visible = false
+	_lan_server_screen.visible = false
 	_hud.visible = true
 	_hud.set_intro_mode(true)
 	_hud.professor.set_battle_intro_mode(true)
@@ -345,7 +391,11 @@ func _on_battle_intro_finished() -> void:
 
 func _on_back_from_battle_setup() -> void:
 	_battle_setup_screen.visible = false
-	_battle_mode_screen.visible = true
+	if _local_setup_active:
+		_lan_server_screen.call("show_local_setup")
+		_lan_server_screen.visible = true
+	else:
+		_battle_mode_screen.visible = true
 	_phase = GamePhase.State.BATTLE_SETUP
 
 
@@ -432,49 +482,51 @@ func _on_question_started(question: Question) -> void:
 			_fast_correct_streaks[player] = 0
 	_answered_players_this_question.clear()
 	_question_started_at_msec = Time.get_ticks_msec()
+	_question_time_remaining = QUESTION_TIMER_DURATION
 	_phase = GamePhase.State.QUESTION
+	_hud.set_question_timer(_question_timer_enabled, QUESTION_TIMER_DURATION)
 	_audio.play_sfx(GameAssets.Sfx.NEW_QUESTION)
 	_hud.question_panel.show_question(question)
+	_hud.show_answers(question)
 
 
 func _on_answer_resolved(player: int, option_index: int, correct: bool) -> void:
-	_hud.question_panel.highlight_answer(_round.current_question.correct_index, option_index)
+	_hud.highlight_answer(_round.current_question.correct_index, option_index, correct)
 	var origin := _hud.get_panel(player).get_floating_text_origin()
-	var elapsed_seconds: float = float(Time.get_ticks_msec() - _question_started_at_msec) / 1000.0
-	var answered_fast: bool = elapsed_seconds < GameConfig.FAST_ANSWER_TIME_LIMIT
 	if not _answered_players_this_question.has(player):
 		_answered_players_this_question.append(player)
-	if answered_fast:
-		_fast_question_streaks[player] += 1
+	if correct:
+		_correct_answer_streaks[player] += 1
+		var charge_gain := 15.0
+		if _correct_answer_streaks[player] == 2:
+			charge_gain = 25.0
+		elif _correct_answer_streaks[player] == 3:
+			charge_gain = 45.0
+		elif _correct_answer_streaks[player] >= 4:
+			charge_gain = 60.0
+		if _kick_fatality_enabled:
+			_fatality_charges[player] = minf(_fatality_charges[player] + charge_gain, 100.0)
+		_hud.set_charge(player, _fatality_charges[player], _kick_fatality_enabled)
 	else:
-		_fast_question_streaks[player] = 0
-	if correct and answered_fast:
-		_fast_correct_streaks[player] += 1
-	else:
-		_fast_correct_streaks[player] = 0
-	var triggered_fatality: bool = (
-		_fast_question_streaks[player] >= GameConfig.FAST_ANSWER_QUESTION_STREAK
-		or _fast_correct_streaks[player] >= GameConfig.FAST_CORRECT_ANSWER_STREAK
-	)
+		# Qualquer erro interrompe a sequência antes do próximo acerto.
+		for player_id in GameConfig.PLAYERS:
+			_correct_answer_streaks[player_id] = 0
 
 	if correct:
 		_correct_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.CORRECT)
 		FloatingText.spawn(_ui_layer, origin, "ACERTOU!", Color(0.2, 1, 0.3))
-		if triggered_fatality:
-			_start_professor_fatality(player)
-		else:
-			_launch_projectile(player)
+		_launch_projectile(player)
 	else:
 		_error_counts[player] += 1
 		_audio.play_sfx(GameAssets.Sfx.WRONG)
 		FloatingText.spawn(_ui_layer, origin, "ERROU!", Color(1, 0.2, 0.2))
-		if triggered_fatality:
-			_start_professor_fatality(player)
 
 
 func _start_professor_fatality(player: int) -> void:
 	_phase = GamePhase.State.PROFESSOR_FATALITY
+	_hud.set_question_timer(false, 0.0)
+	_professor_fatality_screen.set_fatality_victim_name(_hud.get_panel(player).get_player_name())
 	_round.stop()
 	_answered_players_this_question.clear()
 	for player_id in GameConfig.PLAYERS:
@@ -556,6 +608,7 @@ func _start_professor_fatality(player: int) -> void:
 
 func _launch_projectile(attacker: int) -> void:
 	_phase = GamePhase.State.PROJECTILE
+	_hud.set_question_timer(false, 0.0)
 	var attacker_panel := _hud.get_panel(attacker)
 	await attacker_panel.play_preparing()
 	attacker_panel.play_throw()

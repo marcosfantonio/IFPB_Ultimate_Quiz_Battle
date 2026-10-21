@@ -42,6 +42,11 @@ func stop() -> void:
 	_round_id += 1
 
 
+func expire_current_question() -> void:
+	if _active:
+		start_round()
+
+
 func submit_answer(player: int, option_index: int) -> void:
 	if not _active or _locked or _failed_players.has(player):
 		return

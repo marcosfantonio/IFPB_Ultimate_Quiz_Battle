@@ -54,6 +54,10 @@ func show_rage_idle() -> void:
 	_explosion.visible = false
 
 
+func set_fatality_victim_name(player_name: String) -> void:
+	_message.text = "VOCÊ CHUTOU, %s?!" % player_name
+
+
 func play_rage_image() -> void:
 	visible = true
 	_rage_white_flash.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)

@@ -7,6 +7,8 @@ signal back_requested
 
 var _representative_edits: Array[LineEdit] = []
 var _team_edits: Array[LineEdit] = []
+var _navigation_controls: Array[Control] = []
+var _navigation_index := 0
 
 
 func _ready() -> void:
@@ -23,11 +25,30 @@ func _ready() -> void:
 	$StartButton.pressed.connect(_on_start_pressed)
 	$BackButton.pressed.connect(func() -> void: back_requested.emit())
 	UITheme.apply_font(self)
+	_navigation_controls = [
+		_representative_edits[0], _team_edits[0],
+		_representative_edits[1], _team_edits[1],
+		$StartButton as Button, $BackButton as Button,
+	]
 
 
 func _process(_delta: float) -> void:
 	if visible and Input.is_action_just_pressed("ui_cancel"):
 		back_requested.emit()
+
+
+func _input(event: InputEvent) -> void:
+	if not visible or not event is InputEventKey or not event.pressed or event.echo:
+		return
+	if event.keycode in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT]:
+		var focused := get_viewport().gui_get_focus_owner()
+		if focused is LineEdit and event.keycode in [KEY_LEFT, KEY_RIGHT]:
+			return
+		var direction := -1 if event.keycode in [KEY_UP, KEY_LEFT] else 1
+		var current_index := _navigation_controls.find(focused)
+		_navigation_index = posmod((current_index if current_index >= 0 else _navigation_index) + direction, _navigation_controls.size())
+		_navigation_controls[_navigation_index].grab_focus()
+		get_viewport().set_input_as_handled()
 
 
 func focus_first_field() -> void:

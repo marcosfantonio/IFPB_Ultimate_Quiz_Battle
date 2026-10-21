@@ -8,6 +8,7 @@ signal answer_requested(player: int, option_index: int)
 signal menu_move_requested(direction: int)
 signal debug_win_requested
 signal debug_fatality_requested
+signal fatality_requested(player: int)
 
 const DEBUG_COMMANDS = ["VENCEU", "TRIGGER"]
 const DEBUG_INPUT_TIMEOUT_MS = 1800
@@ -21,14 +22,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _capture_debug_command(event.keycode):
 		return
+	if event.keycode == KEY_SHIFT:
+		fatality_requested.emit(1)
+		return
+	if event.keycode == KEY_SPACE:
+		fatality_requested.emit(2)
+		return
 
 	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
 		start_requested.emit()
 		return
-	if event.keycode == KEY_UP:
+	if event.keycode == KEY_UP or event.keycode == KEY_LEFT:
 		menu_move_requested.emit(-1)
 		return
-	if event.keycode == KEY_DOWN:
+	if event.keycode == KEY_DOWN or event.keycode == KEY_RIGHT:
 		menu_move_requested.emit(1)
 		return
 
